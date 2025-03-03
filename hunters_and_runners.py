@@ -14,11 +14,12 @@ class Critter(mesa.Agent):
         super().__init__(unique_id, model)
         self.moves = moves
         self.move_ind = 0
+        self.next_move = "R"
         self.type = "Undefined"
         self.initial_x = x
         self.initial_y = y
 
-        # MY STUFF
+        # Vision
         self.sight_range = max(sight_range, 1)
         self.vision = []
 
@@ -33,33 +34,36 @@ class Critter(mesa.Agent):
 
     def step(self):
         self.see()
-        self.move()
-
-    '''
-        Move agent, according to its program. Agents cannot occupy the same space as an obstacle, or other agent. 
-    '''
-    def move(self):
+        self.decide_move()
+        self.do_move()
+    
+    def decide_move(self):
         # if end of program has been reached, loop back to beginning
         if self.move_ind > (len(self.moves)-1):
             self.move_ind = 0
         # get next move from program
-        move = self.moves[self.move_ind]
+        self.next_move = self.moves[self.move_ind]
+
+    '''
+        Move agent, according to its program. Agents cannot occupy the same space as an obstacle, or other agent. 
+    '''
+    def do_move(self):
         
         # initialise coordinates for next step to current location
         new_x = self.pos[0]
         new_y = self.pos[1]
 
         # set coordinates for attempted move - move may be blocked later, by obstacle or other agent
-        if move == "R": # pick random location in Moore neighbourhood
+        if self.next_move == "R": # pick random location in Moore neighbourhood
             new_x = self.pos[0] + np.random.choice([-1, 0, 1])
             new_y = self.pos[1] + np.random.choice([-1, 0, 1])
-        elif move == "N": # set y to row above 
+        elif self.next_move == "N": # set y to row above 
             new_y = self.pos[1] + 1
-        elif move == "S": # set y to row below
+        elif self.next_move == "S": # set y to row below
             new_y = self.pos[1] - 1
-        elif move == "E": # set x to right column
+        elif self.next_move == "E": # set x to right column
             new_x = self.pos[0] + 1
-        elif move == "W": # set x to left column
+        elif self.next_move == "W": # set x to left column
             new_x = self.pos[0] - 1
         else:
             print("Not a valid move!")
@@ -103,9 +107,9 @@ class Hunter(Critter):
         super().__init__(unique_id, model, moves, x, max(30, y), sight_range=3) # make all hunters start near the top of the environment
         self.type = "Hunter"
 
-    def move(self):
+    def do_move(self):
         # move
-        super().move()
+        super().do_move()
 
         # get neighbours
         neighbours = self.model.grid.get_neighbors(self.pos,
@@ -130,13 +134,13 @@ class Runner(Critter):
         super().print_me()
         print("Pause:", self.pause)
 
-    def move(self):
+    def do_move(self):
         # runners will only move if they have not escaped already, and they have not been killed by hunters
         if not self.escaped and self.alive:
             if self.steps < self.pause:
                 self.steps += 1
             else:
-                super().move()
+                super().do_move()
                 if self.pos[1] >= self.model.grid.height - 1:
                     self.escaped = True
 
@@ -185,8 +189,6 @@ class HuntNRun(mesa.Model):
         escaped_count = 0
         death_count = 0
         for r in self.runners:
-            r.print_me()
-
             if r.escaped:
                 escaped_count += 1
             elif not r.alive:
