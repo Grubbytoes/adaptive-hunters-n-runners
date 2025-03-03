@@ -3,19 +3,24 @@ import numpy as np
 import time
 import yaml
 import pygame
+import hugo_tools as ht
 
 '''
     Superclass for hunters and runners.
 '''
 class Critter(mesa.Agent):
 
-    def __init__(self, unique_id, model, moves, x, y):
+    def __init__(self, unique_id, model, moves, x, y, sight_range = 1):
         super().__init__(unique_id, model)
         self.moves = moves
         self.move_ind = 0
         self.type = "Undefined"
         self.initial_x = x
         self.initial_y = y
+
+        # MY STUFF
+        self.sight_range = max(sight_range, 1)
+        self.vision = []
 
     '''
         A function to print information about agents and their programs.
@@ -24,8 +29,10 @@ class Critter(mesa.Agent):
         print("\nAgent, type:", self.type)
         print("Initial coords: (" + str(self.initial_x) + "," + str(self.initial_y) + ")")
         print("Move sequence:", self.moves)
+        print("I can see: ", self.vision)
 
     def step(self):
+        self.see()
         self.move()
 
     '''
@@ -77,11 +84,23 @@ class Critter(mesa.Agent):
         if move:        
             self.model.grid.move_agent(self, (new_x, new_y)) # move
             
-        self.move_ind += 1 # increment program index   
+        self.move_ind += 1 # increment program index
+    
+    def see(self): 
+        # clear vision
+        self.vision.clear()
+
+        for other in self.model.grid.get_neighbors(self.pos, True, radius=self.sight_range):
+            thing_entry = (
+                int(other.pos[0] - self.pos[0]),
+                int(other.pos[1] - self.pos[1]),
+                other.type
+            )
+            self.vision.append(thing_entry)
 
 class Hunter(Critter):
     def __init__(self, unique_id, model, moves, x, y):
-        super().__init__(unique_id, model, moves, x, max(30, y)) # make all hunters start near the top of the environment
+        super().__init__(unique_id, model, moves, x, max(30, y), sight_range=3) # make all hunters start near the top of the environment
         self.type = "Hunter"
 
     def move(self):
@@ -100,7 +119,7 @@ class Hunter(Critter):
 
 class Runner(Critter):
     def __init__(self, unique_id, model, moves, x, y, pause):
-        super().__init__(unique_id, model, moves, x, 0) # make all runners' initial y = 0, so that they have to start at the bottom
+        super().__init__(unique_id, model, moves, x, 0, sight_range=4) # make all runners' initial y = 0, so that they have to start at the bottom
         self.type = "Runner"
         self.pause = pause
         self.steps = 0
@@ -166,6 +185,8 @@ class HuntNRun(mesa.Model):
         escaped_count = 0
         death_count = 0
         for r in self.runners:
+            r.print_me()
+
             if r.escaped:
                 escaped_count += 1
             elif not r.alive:
@@ -253,7 +274,7 @@ def run():
     # set up model
     # - delay parameter can be used to control speed of animation
     #   make it small to make simulation fast
-    model = HuntNRun(delay=100, hunters_filename="hunters.yaml", runners_filename="runners.yaml", obstacles_filename="obstacles.yaml")
+    model = HuntNRun(delay=150, hunters_filename="hunters.yaml", runners_filename="runners.yaml", obstacles_filename="obstacles.yaml")
 
     for i in range(10000): # run for this number of simulation steps at maximum
         # step the model
