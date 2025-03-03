@@ -178,49 +178,6 @@ class HuntNRun(mesa.Model):
                 print(str(escaped_count) + " escaped!")
                 self.stopped = True
 
-class HuntNRun(mesa.Model):
-
-    def __init__(self, delay, hunters_filename, runners_filename, obstacles_filename):
-        super().__init__()
-        self.grid = mesa.space.MultiGrid(20, 40, False)
-        # self.grid = mesa.space.SingleGrid(20, 40, True)
-        self.schedule = mesa.time.RandomActivation(self)
-        self.hunters = make_hunters(hunters_filename, self)
-        self.runners = make_runners(runners_filename, self)
-        self.obstacles = make_obstacles(obstacles_filename, self)
-        self.delay = delay / 1000
-        self.stopped = False
-
-        for h in self.hunters:
-            self.schedule.add(h)
-            self.grid.place_agent(h, (h.initial_x, h.initial_y))
-        for r in self.runners:
-            self.schedule.add(r)
-            self.grid.place_agent(r, (r.initial_x, r.initial_y))
-        for o in self.obstacles:
-            self.schedule.add(o)
-            self.grid.place_agent(o, (o.initial_x, o.initial_y))
-
-    def print_me(self):
-        for a in self.schedule.agents:
-            a.print_me()
-
-    def step(self):
-        escaped_count = 0
-        death_count = 0
-        for r in self.runners:
-            if r.escaped:
-                escaped_count += 1
-            elif not r.alive:
-                death_count += 1
-        if (escaped_count + death_count) != len(self.runners):
-            self.schedule.step()
-            time.sleep(self.delay)
-        else:
-            if not self.stopped:
-                print(str(escaped_count) + " escaped!")
-                self.stopped = True
-
 def make_obstacles(filename, model):
     # read parameters from file
     with open(filename, 'r') as file:
@@ -279,10 +236,10 @@ def make_runners(filename, model):
         
     return runners
 
-# run model once, with specifed noise area and probability
+# run model once, with specified noise area and probability
 def run():
 
-    SCALE = 16
+    SCALE = 4
     WIDTH = 20 # width and height need to match those of the HuntNRun grid
     HEIGHT = 40
     XOFF = SCALE * 10 * 0 # these can be used to place an empty border around the grid
@@ -343,7 +300,7 @@ def run():
         if model.stopped:
             break
 
-    input("Press Enter to close...") # this prevents the pygame window from closing instantly
+    # input("Press Enter to close...") # this prevents the pygame window from closing instantly
     pygame.quit()
 
 run()
