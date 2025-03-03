@@ -3,7 +3,9 @@ import numpy as np
 import time
 import yaml
 import pygame
-import hugo_tools as ht
+import math
+
+AVAILABLE_MOVES = ('N', 'E', 'S', 'W', 'R')
 
 '''
     Superclass for hunters and runners.
@@ -89,17 +91,41 @@ class Critter(mesa.Agent):
         self.vision.clear()
 
         for other in self.model.grid.get_neighbors(self.pos, True, radius=self.sight_range):
-            thing_entry = (
-                int(other.pos[0] - self.pos[0]),
-                int(other.pos[1] - self.pos[1]),
+            xr = int(other.pos[0] - self.pos[0])
+            yr = int(other.pos[1] - self.pos[1])
+            mag = math.sqrt(math.pow(xr, 2) + math.pow(yr, 2))
+
+            item = (
+                xr / mag,
+                yr / mag,
+                mag,
                 other.type
             )
-            self.vision.append(thing_entry)
+            self.vision.append(item)
 
 class Hunter(Critter):
     def __init__(self, unique_id, model, x, y):
         super().__init__(unique_id, model, x, max(30, y), sight_range=3) # make all hunters start near the top of the environment
         self.type = "Hunter"
+
+    def decide_move(self):
+        super().decide_move()
+        weights = np.array([0, 0, 0, 0, 0.1])
+
+        # Lets have a look at those runners then!!
+        for other in self.vision:
+            if other[3] != "Runner":
+                continue
+            
+            print("I can see a runner!")
+            # TODO
+
+            weights[0] += max(other[1], 0)
+            weights[1] += max(other[0], 0)
+            weights[2] += max(-1 * other[1], 0)
+            weights[3] += max(-1 * other[0], 0)
+
+        self.next_move = AVAILABLE_MOVES[np.argmax(weights)]
 
     def do_move(self):
         # move
@@ -270,7 +296,7 @@ def run():
     # set up model
     # - delay parameter can be used to control speed of animation
     #   make it small to make simulation fast
-    model = HuntNRun(delay=150, hunters_filename="hunters.yaml", runners_filename="runners.yaml", obstacles_filename="obstacles.yaml")
+    model = HuntNRun(delay=75, hunters_filename="hunters.yaml", runners_filename="runners.yaml", obstacles_filename="obstacles.yaml")
 
     for i in range(10000): # run for this number of simulation steps at maximum
         # step the model
