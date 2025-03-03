@@ -10,9 +10,8 @@ import hugo_tools as ht
 '''
 class Critter(mesa.Agent):
 
-    def __init__(self, unique_id, model, moves, x, y, sight_range = 1):
+    def __init__(self, unique_id, model, x, y, sight_range = 1):
         super().__init__(unique_id, model)
-        self.moves = moves
         self.move_ind = 0
         self.next_move = "R"
         self.type = "Undefined"
@@ -29,7 +28,6 @@ class Critter(mesa.Agent):
     def print_me(self):
         print("\nAgent, type:", self.type)
         print("Initial coords: (" + str(self.initial_x) + "," + str(self.initial_y) + ")")
-        print("Move sequence:", self.moves)
         print("I can see: ", self.vision)
 
     def step(self):
@@ -38,11 +36,7 @@ class Critter(mesa.Agent):
         self.do_move()
     
     def decide_move(self):
-        # if end of program has been reached, loop back to beginning
-        if self.move_ind > (len(self.moves)-1):
-            self.move_ind = 0
-        # get next move from program
-        self.next_move = self.moves[self.move_ind]
+        self.next_move = "R"
 
     '''
         Move agent, according to its program. Agents cannot occupy the same space as an obstacle, or other agent. 
@@ -103,8 +97,8 @@ class Critter(mesa.Agent):
             self.vision.append(thing_entry)
 
 class Hunter(Critter):
-    def __init__(self, unique_id, model, moves, x, y):
-        super().__init__(unique_id, model, moves, x, max(30, y), sight_range=3) # make all hunters start near the top of the environment
+    def __init__(self, unique_id, model, x, y):
+        super().__init__(unique_id, model, x, max(30, y), sight_range=3) # make all hunters start near the top of the environment
         self.type = "Hunter"
 
     def do_move(self):
@@ -122,8 +116,8 @@ class Hunter(Critter):
                 n.alive = False  
 
 class Runner(Critter):
-    def __init__(self, unique_id, model, moves, x, y, pause):
-        super().__init__(unique_id, model, moves, x, 0, sight_range=4) # make all runners' initial y = 0, so that they have to start at the bottom
+    def __init__(self, unique_id, model, x, y, pause):
+        super().__init__(unique_id, model, x, 0, sight_range=4) # make all runners' initial y = 0, so that they have to start at the bottom
         self.type = "Runner"
         self.pause = pause
         self.steps = 0
@@ -226,7 +220,7 @@ def make_hunters(filename, model):
         params_dict = yaml.safe_load(file)
 
     n = 4
-    expected_keys = ["movelist"]
+    expected_keys = []
     for i in range(n):
         expected_keys.append("x"+str(i))
         expected_keys.append("y"+str(i))
@@ -235,7 +229,7 @@ def make_hunters(filename, model):
 
     hunters = []
     for i in range(n):
-        hunters.append(Hunter("h"+str(i), model, params_dict["movelist"], params_dict["x" + str(i)], params_dict["y" + str(i)]))
+        hunters.append(Hunter("h"+str(i), model, params_dict["x" + str(i)], params_dict["y" + str(i)]))
 
     return hunters
 
@@ -245,7 +239,7 @@ def make_runners(filename, model):
         params_dict = yaml.safe_load(file)
 
     n = 6
-    expected_keys = ["movelist"]
+    expected_keys = []
     for i in range(n):
         expected_keys.append("x"+str(i))
         expected_keys.append("y"+str(i))
@@ -255,7 +249,7 @@ def make_runners(filename, model):
 
     runners = []
     for i in range(n):
-        runners.append(Runner("h"+str(i), model, params_dict["movelist"], params_dict["x" + str(i)], params_dict["y" + str(i)], params_dict["p" + str(i)]))
+        runners.append(Runner("h"+str(i), model, params_dict["x" + str(i)], params_dict["y" + str(i)], params_dict["p" + str(i)]))
         
     return runners
 
