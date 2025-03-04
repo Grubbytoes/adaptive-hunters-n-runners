@@ -95,11 +95,12 @@ class Critter(mesa.Agent):
             yr = int(other.pos[1] - self.pos[1])
             mag = math.sqrt(math.pow(xr, 2) + math.pow(yr, 2))
 
+            #! Gotta be a better way of doing this!!
             item = (
                 xr / mag,
                 yr / mag,
                 mag,
-                other.type
+                other.type,
             )
             self.vision.append(item)
 
@@ -110,7 +111,7 @@ class Hunter(Critter):
 
     def decide_move(self):
         super().decide_move()
-        weights = np.array([0, 0, 0, 0, 0.1])
+        weights = np.zeros(5)
 
         # Lets have a look at those runners then!!
         for other in self.vision:
@@ -124,6 +125,11 @@ class Hunter(Critter):
             weights[1] += max(other[0], 0)
             weights[2] += max(-1 * other[1], 0)
             weights[3] += max(-1 * other[0], 0)
+        
+        # Introduce noise to the weights
+        for i in range(len(weights)):
+            noise = np.random.rand() / 4
+            weights[i] += noise
 
         self.next_move = AVAILABLE_MOVES[np.argmax(weights)]
 
@@ -139,7 +145,7 @@ class Hunter(Critter):
         # any neighbours that are runners are killed
         for n in neighbours:
             if n.type == "Runner":
-                n.alive = False  
+                n.kill()
 
 class Runner(Critter):
     def __init__(self, unique_id, model, x, y, pause):
@@ -163,6 +169,10 @@ class Runner(Critter):
                 super().do_move()
                 if self.pos[1] >= self.model.grid.height - 1:
                     self.escaped = True
+    
+    def kill(self):
+        self.alive = False
+        self.type = 'DeadCritter' #! not fully happy with this...!
 
 class Obstacle(mesa.Agent):
     def __init__(self, unique_id, model, x, y):
