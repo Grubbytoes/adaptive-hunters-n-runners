@@ -1,190 +1,8 @@
 import mesa
-import numpy as np
 import time
 import yaml
 import pygame
-import math
-
-AVAILABLE_MOVES = ('N', 'E', 'S', 'W', 'R')
-
-'''
-    Superclass for hunters and runners.
-'''
-class Critter(mesa.Agent):
-
-    def __init__(self, unique_id, model, x, y, sight_range = 1):
-        super().__init__(unique_id, model)
-        self.move_ind = 0
-        self.next_move_weights = np.ones(5)
-        self.type = "Undefined"
-        self.initial_x = x
-        self.initial_y = y
-
-        # Vision
-        self.sight_range = max(sight_range, 1)
-        self.vision = []
-
-    '''
-        A function to print information about agents and their programs.
-    '''
-    def print_me(self):
-        print("\nAgent, type:", self.type)
-        print("Initial coords: (" + str(self.initial_x) + "," + str(self.initial_y) + ")")
-        print("I can see: ", self.vision)
-
-    def step(self):
-        self.see()
-        self.decide_move()
-        self.do_move()
-    
-    def decide_move(self) -> None:
-        self.next_move_weights = np.ones(5)
-        introduce_noise(self.next_move_weights)
-
-    '''
-        Move agent, according to its program. Agents cannot occupy the same space as an obstacle, or other agent. 
-    '''
-    def do_move(self):
-        introduce_noise(self.next_move_weights)
-        move = AVAILABLE_MOVES[np.argmax(self.next_move_weights)]
-        
-        # initialise coordinates for next step to current location
-        new_x = self.pos[0]
-        new_y = self.pos[1]
-
-        # set coordinates for attempted move - move may be blocked later, by obstacle or other agent
-        if move == "R": # pick random location in Moore neighbourhood
-            new_x = self.pos[0] + np.random.choice([-1, 0, 1])
-            new_y = self.pos[1] + np.random.choice([-1, 0, 1])
-        elif move == "N": # set y to row above 
-            new_y = self.pos[1] + 1
-        elif move == "S": # set y to row below
-            new_y = self.pos[1] - 1
-        elif move == "E": # set x to right column
-            new_x = self.pos[0] + 1
-        elif move == "W": # set x to left column
-            new_x = self.pos[0] - 1
-        else:
-            print("Not a valid move!")
-
-        if new_y < 0: # prevent agents from moving off bottom of grid
-            new_y = 0
-        elif new_y >= self.model.grid.height: # prevent agents from moving off top of grid
-            new_y = self.model.grid.height - 1
-
-        if new_x < 0: # prevent agents from moving off left of grid
-            new_x = 0
-        elif new_x >= self.model.grid.width: # prevent agents from moving off right of grid
-            new_x = self.model.grid.width - 1
-
-        # get obstacles and agents in Moore neighbourhood
-        neighbours = self.model.grid.get_neighbors(self.pos, True)
-        move = True
-        for n in neighbours:
-            if n.pos == (new_x, new_y): # prevent moving into cell with obstacle or other agent
-                move = False    
-
-        if move:        
-            self.model.grid.move_agent(self, (new_x, new_y)) # move
-            
-        self.move_ind += 1 # increment program index
-    
-    def see(self): 
-        # clear vision
-        self.vision.clear()
-
-        for other in self.model.grid.get_neighbors(self.pos, True, radius=self.sight_range):
-            xr = int(other.pos[0] - self.pos[0])
-            yr = int(other.pos[1] - self.pos[1])
-            mag = math.sqrt(math.pow(xr, 2) + math.pow(yr, 2))
-
-            #! Gotta be a better way of doing this!!
-            item = (
-                xr / mag,
-                yr / mag,
-                mag,
-                other.type,
-            )
-            self.vision.append(item)
-
-class Hunter(Critter):
-    def __init__(self, unique_id, model, x, y):
-        super().__init__(unique_id, model, x, max(30, y), sight_range=2) # make all hunters start near the top of the environment
-        self.type = "Hunter"
-
-    def decide_move(self):
-        super().decide_move()
-
-        # Lets have a look at those runners then!!
-        for other in self.vision:
-            if other[3] != "Runner":
-                continue
-            
-            print("I can see a runner!")
-            # TODO
-
-            self.next_move_weights[0] += max(other[1], 0)
-            self.next_move_weights[1] += max(other[0], 0)
-            self.next_move_weights[2] += max(-1 * other[1], 0)
-            self.next_move_weights[3] += max(-1 * other[0], 0)
-
-    def do_move(self):
-        # move
-        super().do_move()
-
-        # get neighbours
-        neighbours = self.model.grid.get_neighbors(self.pos, moore=True, include_center=True)
-        
-        # any neighbours that are runners are killed
-        for n in neighbours:
-            if n.type == "Runner":
-                n.kill()
-
-class Runner(Critter):
-    def __init__(self, unique_id, model, x, y, pause):
-        super().__init__(unique_id, model, x, 0, sight_range=4) # make all runners' initial y = 0, so that they have to start at the bottom
-        self.type = "Runner"
-        self.pause = pause
-        self.steps = 0
-        self.escaped = False
-        self.alive = True
-
-    def print_me(self):
-        super().print_me()
-        print("Pause:", self.pause)
-    
-    def decide_move(self):
-        super().decide_move()
-        self.next_move_weights[0] += 0.1
-
-
-    def do_move(self):
-        # runners will only move if they have not escaped already, and they have not been killed by hunters
-        if not self.escaped and self.alive:
-            if self.steps < self.pause:
-                self.steps += 1
-            else:
-                super().do_move()
-                if self.pos[1] >= self.model.grid.height - 1:
-                    self.escaped = True
-    
-    def kill(self):
-        self.alive = False
-        self.type = 'DeadCritter' #! not fully happy with this...!
-
-class Obstacle(mesa.Agent):
-    def __init__(self, unique_id, model, x, y):
-        super().__init__(unique_id, model)
-        self.type = "Obstacle"
-        self.initial_x = x
-        self.initial_y = y
-    
-    def print_me(self):
-        print("\nAgent, type:", self.type)
-        print("Initial coords: (" + str(self.initial_x) + "," + str(self.initial_y) + ")")
-
-    def step(self):
-        pass
+import critters
 
 class HuntNRun(mesa.Model):
 
@@ -244,7 +62,7 @@ def make_obstacles(filename, model):
 
     obstacles = []
     for i in range(n):
-        obstacles.append(Obstacle("o"+str(i), model, params_dict["x" + str(i)], params_dict["y" + str(i)]))
+        obstacles.append(critters.Obstacle("o"+str(i), model, params_dict["x" + str(i)], params_dict["y" + str(i)]))
 
     return obstacles
 
@@ -263,7 +81,7 @@ def make_hunters(filename, model):
 
     hunters = []
     for i in range(n):
-        hunters.append(Hunter("h"+str(i), model, params_dict["x" + str(i)], params_dict["y" + str(i)]))
+        hunters.append(critters.Hunter("h"+str(i), model, params_dict["x" + str(i)], params_dict["y" + str(i)]))
 
     return hunters
 
@@ -283,16 +101,9 @@ def make_runners(filename, model):
 
     runners = []
     for i in range(n):
-        runners.append(Runner("h"+str(i), model, params_dict["x" + str(i)], params_dict["y" + str(i)], params_dict["p" + str(i)]))
+        runners.append(critters.Runner("h"+str(i), model, params_dict["x" + str(i)], params_dict["y" + str(i)], params_dict["p" + str(i)]))
         
     return runners
-
-
-def introduce_noise(weights: np.ndarray, noise_amount=0.1):
-    # Introduce noise to the weights
-    for i in range(len(weights)):
-        noise = 1 - noise_amount + (np.random.rand() * noise_amount * 2)
-        weights[i] *= noise
 
 
 # run model once, with specified noise area and probability
@@ -328,14 +139,14 @@ def run():
         surface.fill((0, 0, 0))
 
         # draw hunters
-        for a in model.get_agents_of_type(Hunter): 
+        for a in model.get_agents_of_type(critters.Hunter): 
             colour = (255, 0, 0)
             col = a.pos[0]
             row = a.pos[1]
             pygame.draw.rect(surface, colour, pygame.Rect(XOFF + col*SCALE, YOFF + row*SCALE, SCALE, SCALE))
 
         # draw runners
-        for a in model.get_agents_of_type(Runner): 
+        for a in model.get_agents_of_type(critters.Runner): 
             if a.alive:
                 colour = (0, 0, 255)
             else:
@@ -345,7 +156,7 @@ def run():
             pygame.draw.rect(surface, colour, pygame.Rect(XOFF + col*SCALE, YOFF + row*SCALE, SCALE, SCALE))
         
         # draw obstacles
-        for a in model.get_agents_of_type(Obstacle): 
+        for a in model.get_agents_of_type(critters.Obstacle): 
             colour = (0, 255, 0)
             col = a.pos[0]
             row = a.pos[1]
