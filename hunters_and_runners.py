@@ -15,7 +15,7 @@ class Critter(mesa.Agent):
     def __init__(self, unique_id, model, x, y, sight_range = 1):
         super().__init__(unique_id, model)
         self.move_ind = 0
-        self.next_move = "R"
+        self.next_move_weights = np.ones(5)
         self.type = "Undefined"
         self.initial_x = x
         self.initial_y = y
@@ -37,29 +37,32 @@ class Critter(mesa.Agent):
         self.decide_move()
         self.do_move()
     
-    def decide_move(self):
-        self.next_move = "R"
+    def decide_move(self) -> None:
+        self.next_move_weights = np.ones(5)
+        introduce_noise(self.next_move_weights)
 
     '''
         Move agent, according to its program. Agents cannot occupy the same space as an obstacle, or other agent. 
     '''
     def do_move(self):
+        introduce_noise(self.next_move_weights)
+        move = AVAILABLE_MOVES[np.argmax(self.next_move_weights)]
         
         # initialise coordinates for next step to current location
         new_x = self.pos[0]
         new_y = self.pos[1]
 
         # set coordinates for attempted move - move may be blocked later, by obstacle or other agent
-        if self.next_move == "R": # pick random location in Moore neighbourhood
+        if move == "R": # pick random location in Moore neighbourhood
             new_x = self.pos[0] + np.random.choice([-1, 0, 1])
             new_y = self.pos[1] + np.random.choice([-1, 0, 1])
-        elif self.next_move == "N": # set y to row above 
+        elif move == "N": # set y to row above 
             new_y = self.pos[1] + 1
-        elif self.next_move == "S": # set y to row below
+        elif move == "S": # set y to row below
             new_y = self.pos[1] - 1
-        elif self.next_move == "E": # set x to right column
+        elif move == "E": # set x to right column
             new_x = self.pos[0] + 1
-        elif self.next_move == "W": # set x to left column
+        elif move == "W": # set x to left column
             new_x = self.pos[0] - 1
         else:
             print("Not a valid move!")
@@ -106,12 +109,11 @@ class Critter(mesa.Agent):
 
 class Hunter(Critter):
     def __init__(self, unique_id, model, x, y):
-        super().__init__(unique_id, model, x, max(30, y), sight_range=3) # make all hunters start near the top of the environment
+        super().__init__(unique_id, model, x, max(30, y), sight_range=2) # make all hunters start near the top of the environment
         self.type = "Hunter"
 
     def decide_move(self):
         super().decide_move()
-        weights = np.zeros(5)
 
         # Lets have a look at those runners then!!
         for other in self.vision:
@@ -121,26 +123,17 @@ class Hunter(Critter):
             print("I can see a runner!")
             # TODO
 
-            weights[0] += max(other[1], 0)
-            weights[1] += max(other[0], 0)
-            weights[2] += max(-1 * other[1], 0)
-            weights[3] += max(-1 * other[0], 0)
-        
-        # Introduce noise to the weights
-        for i in range(len(weights)):
-            noise = np.random.rand() / 4
-            weights[i] += noise
-
-        self.next_move = AVAILABLE_MOVES[np.argmax(weights)]
+            self.next_move_weights[0] += max(other[1], 0)
+            self.next_move_weights[1] += max(other[0], 0)
+            self.next_move_weights[2] += max(-1 * other[1], 0)
+            self.next_move_weights[3] += max(-1 * other[0], 0)
 
     def do_move(self):
         # move
         super().do_move()
 
         # get neighbours
-        neighbours = self.model.grid.get_neighbors(self.pos,
-                                                    moore=True,
-                                                    include_center=True)
+        neighbours = self.model.grid.get_neighbors(self.pos, moore=True, include_center=True)
         
         # any neighbours that are runners are killed
         for n in neighbours:
@@ -159,6 +152,11 @@ class Runner(Critter):
     def print_me(self):
         super().print_me()
         print("Pause:", self.pause)
+    
+    def decide_move(self):
+        super().decide_move()
+        self.next_move_weights[0] += 0.1
+
 
     def do_move(self):
         # runners will only move if they have not escaped already, and they have not been killed by hunters
@@ -289,10 +287,18 @@ def make_runners(filename, model):
         
     return runners
 
+
+def introduce_noise(weights: np.ndarray, noise_amount=0.1):
+    # Introduce noise to the weights
+    for i in range(len(weights)):
+        noise = 1 - noise_amount + (np.random.rand() * noise_amount * 2)
+        weights[i] *= noise
+
+
 # run model once, with specified noise area and probability
 def run():
 
-    SCALE = 4
+    SCALE = 8
     WIDTH = 20 # width and height need to match those of the HuntNRun grid
     HEIGHT = 40
     XOFF = SCALE * 10 * 0 # these can be used to place an empty border around the grid
