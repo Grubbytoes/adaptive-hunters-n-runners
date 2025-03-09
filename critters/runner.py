@@ -1,5 +1,5 @@
 from .critter import Critter
-
+from .runnerbrain import RunnerBrain
 
 class Runner(Critter):
     def __init__(self, unique_id, model, x, y, pause):
@@ -9,6 +9,7 @@ class Runner(Critter):
         self.steps = 0
         self.escaped = False
         self.alive = True
+        self.brain = RunnerBrain()
 
     def print_me(self):
         super().print_me()
@@ -16,18 +17,25 @@ class Runner(Critter):
     
     def decide_move(self):
         super().decide_move()
-        self.next_move_weights[0] += 0.1
-
+        self.brain.foo(self.next_move_weights, self.vision)
 
     def do_move(self):
-        # runners will only move if they have not escaped already, and they have not been killed by hunters
-        if not self.escaped and self.alive:
-            if self.steps < self.pause:
-                self.steps += 1
-            else:
-                super().do_move()
-                if self.pos[1] >= self.model.grid.height - 1:
-                    self.escaped = True
+        # runners will only move if they have not escaped already
+        if self.escaped:
+            return
+        # and they have not been killed by hunters
+        elif not self.alive:
+            return
+        
+        # wait if they need to
+        if self.steps < self.pause:
+            self.steps += 1
+            return
+        
+        super().do_move()
+        
+        if self.pos[1] >= self.model.grid.height - 1:
+            self.escaped = True
     
     def kill(self):
         self.alive = False

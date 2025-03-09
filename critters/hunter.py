@@ -13,9 +13,6 @@ class Hunter(Critter):
         for other in self.vision:
             if other[3] != "Runner":
                 continue
-            
-            print("I can see a runner!")
-            # TODO
 
             self.next_move_weights[0] += max(other[1], 0)
             self.next_move_weights[1] += max(other[0], 0)
@@ -25,11 +22,8 @@ class Hunter(Critter):
     def do_move(self):
         # move
         super().do_move()
-
-        # get neighbours
-        neighbours = self.model.grid.get_neighbors(self.pos, moore=True, include_center=True)
         
         # any neighbours that are runners are killed
-        for n in neighbours:
+        for n in self.model.grid.get_neighbors(self.pos, moore=True, include_center=True):
             if n.type == "Runner":
                 n.kill()

@@ -92,15 +92,21 @@ class Critter(mesa.Agent):
         self.vision.clear()
 
         for other in self.model.grid.get_neighbors(self.pos, True, radius=self.sight_range):
-            xr = int(other.pos[0] - self.pos[0])
-            yr = int(other.pos[1] - self.pos[1])
-            mag = math.sqrt(math.pow(xr, 2) + math.pow(yr, 2))
+            x_relative = int(other.pos[0] - self.pos[0])
+            y_relative = int(other.pos[1] - self.pos[1])
+            magnitude = math.sqrt(math.pow(x_relative, 2) + math.pow(y_relative, 2))
+            closeness = (self.sight_range - magnitude) / magnitude
 
-            #! Gotta be a better way of doing this!!
+            # vision entries are structured like so:
+            #   [0] x component
+            #   [1] y component
+            #   [2] closeness, 0 being edge of vision, 1 being basically on top of you
+            #   [3] agent type
+            
             item = (
-                xr / mag,
-                yr / mag,
-                mag,
+                x_relative / magnitude,
+                y_relative / magnitude,
+                closeness,
                 other.type,
             )
             self.vision.append(item)
