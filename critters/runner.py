@@ -17,7 +17,7 @@ class Runner(Critter):
     
     def decide_move(self):
         super().decide_move()
-        self.brain.foo(self.next_move_weights, self.vision)
+        self.brain.think(self.next_move_weights, self.vision)
 
     def do_move(self):
         # runners will only move if they have not escaped already
