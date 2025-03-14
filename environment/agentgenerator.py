@@ -16,13 +16,12 @@ class AgentGenerator:
         runners = []
         obstacles = []
         
-        # TODO actually make the damn critters!
         runner_count: int = int(self._width / 8)
         hunter_count: int = int(runner_count / 2) - 1
-        obstacle_count: int = int(self._width * self._height * 0.5 * 0.1)
+        obstacle_count: int = int(self._width * self._height * 0.5 * 0.05)
         forest_band = (
-            int(self._height / 4), 
-            int(self._height / 4 * 3)
+            int(self._height / 8), 
+            int(self._height / 8 * 7)
         )
         
         # making runners
@@ -47,6 +46,7 @@ class AgentGenerator:
                 x_position = random.randint(0, self._width)
                 y_position = random.randint(*forest_band)
             new_obstacle = critters.Obstacle(f"o{i}", environment_model, x_position, y_position)
+            obstacles.append(new_obstacle)
             
         
         for h in hunters:

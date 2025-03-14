@@ -81,7 +81,7 @@ class HunterRunnerEnvironment(mesa.Model):
 
 #     hunters = []
 #     for i in range(n):
-#         hunters.append(critters.Hunter("h"+str(i), model, params_dict["x" + str(i)], params_dict["y" + str(i)]))
+        # hunters.append(critters.Hunter("h"+str(i), model, params_dict["x" + str(i)], params_dict["y" + str(i)]))
 
 #     return hunters
 

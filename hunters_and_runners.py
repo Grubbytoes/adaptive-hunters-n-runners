@@ -59,6 +59,7 @@ def run():
         # draw obstacles
         for a in model.get_agents_of_type(critters.Obstacle): 
             colour = (0, 255, 0)
+            # TODO goes wrong here!!
             col = a.pos[0]
             row = a.pos[1]
             pygame.draw.rect(surface, colour, pygame.Rect(XOFF + col*SCALE, YOFF + row*SCALE, SCALE, SCALE))
