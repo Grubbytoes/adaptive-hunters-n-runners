@@ -15,7 +15,7 @@ class HunterRunnerEnvironment(mesa.Model):
         self.schedule = mesa.time.RandomActivation(self)
         self.delay = delay / 1000
         self.stopped = False
-        self.generator = AgentGenerator(width, height)
+        self.generator = AgentGenerator(width, height, self)
         
         self.hunters = []
         self.runners = []
@@ -25,7 +25,7 @@ class HunterRunnerEnvironment(mesa.Model):
     
     # MUST be called before the model is run if you want to have any actual agents...!
     def populate(self):
-        self.generator.populate(self)
+        self.generator.populate()
     
     def populate_next_generation(self, parents):
         pass
