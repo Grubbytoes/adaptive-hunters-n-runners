@@ -1,19 +1,25 @@
 import numpy as np
-
-from itertools import zip_longest
+import random as rand
 
 # This is the class where the actual "meat" of the genetic algorithm will take place!!
 class RunnerBrain():
     
     # first generation constructor!!
-    def __init__(self, parents=[], mutation_ratio=0.2):
-        # initial biases (starting with a preference for north and random)
-        self.initial_bias = (0.2, 0.0, 0.0, 0.0, 0.1)
+    def __init__(self, parents=[], mutation_ratio=0.4, mutation_strength=0.2):
+        # first generation
+        genes = [0 for i in range(35)]
+        if 0 < len(parents):
+            # TODO
+            pass
+        
+        self.apply_mutation(genes, mutation_ratio, mutation_strength)
+        
+        self.initial_bias = tuple(genes[0: 5])
         # weightings for each kind of critter
-        self.hunter_weightings = tuple(0.0 for i in range(10))
-        self.runner_weightings = tuple(0.0 for i in range(10))
+        self.hunter_weightings = tuple(genes[5: 15])
+        self.runner_weightings = tuple(genes[15: 25])
         # weightings for obstacles and other unrecognized agents
-        self.obstacle_weightings = tuple(0.0 for i in range(10))
+        self.obstacle_weightings = tuple(genes[25: 35])
         
         # Map to make life easier
         self.recognition_map = {
@@ -37,6 +43,13 @@ class RunnerBrain():
                 weight_to_add = (item[0] * decision_weights[2*i]) + (item[1] * decision_weights[(2*i)+1])
                 weight_to_add *= (1 + item[2]) 
                 move_weights[i] += weight_to_add
+    
+    def apply_mutation(self, genes, mutation_ratio, mutation_strength):
+        for i in range(len(genes)):
+            if rand.random() > mutation_ratio:
+                continue
+            
+            genes[i] += (rand.random() * mutation_strength * 2) - mutation_strength
     
     def gene_dump(self) -> list[float]:
         genes = [g for g in 
