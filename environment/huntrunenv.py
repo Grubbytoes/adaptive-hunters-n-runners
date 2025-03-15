@@ -20,10 +20,16 @@ class HunterRunnerEnvironment(mesa.Model):
         self.hunters = []
         self.runners = []
         self.obstacles = []
+        
+        self.survivors = []
     
     # MUST be called before the model is run if you want to have any actual agents...!
     def populate(self):
         self.generator.populate(self)
+    
+    def populate_next_generation(self, parents):
+        pass
+        # TODO
 
     def print_me(self):
         for a in self.schedule.agents:
@@ -41,9 +47,14 @@ class HunterRunnerEnvironment(mesa.Model):
             self.schedule.step()
             time.sleep(self.delay)
         else:
-            if not self.stopped:
-                print(str(escaped_count) + " escaped!")
-                self.stopped = True
+            self.end()
+    
+    def end(self):
+        if self.stopped:
+            return
+
+        print("Game over, man!")
+        self.stopped = True
 
 
 # def make_obstacles(filename, model):

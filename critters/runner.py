@@ -36,6 +36,7 @@ class Runner(Critter):
         
         if self.pos[1] >= self.model.grid.height - 1:
             self.escaped = True
+            self.model.survivors.append(self)
     
     def kill(self):
         self.alive = False

@@ -11,7 +11,7 @@ class AgentGenerator:
         self._height = height
         
     
-    def populate(self, environment_model):
+    def populate(self, environment_model, parent_runners=[]):
         hunters = []
         runners = []
         obstacles = []
@@ -61,3 +61,16 @@ class AgentGenerator:
             environment_model.obstacles.append(o)
             environment_model.schedule.add(o)
             environment_model.grid.place_agent(o, (o.initial_x, o.initial_y))
+    
+    def populate_runners(self, parents=[]) -> list[critters.Critter]:
+        runners = []
+        return runners
+    
+    def populate_hunters(self) -> list[critters.Critter]:
+        hunters = []
+        return hunters
+    
+    def populate_obstacles(self) -> list[critters.Critter]:
+        obstacles = []
+        return obstacles
+    
