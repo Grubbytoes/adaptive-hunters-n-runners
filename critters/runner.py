@@ -35,6 +35,8 @@ class Runner(Critter):
         super().do_move()
         
         if self.pos[1] >= self.model.grid.height - 1:
+            gene_dump = self.brain.gene_dump()
+            
             self.escaped = True
             self.model.survivors.append(self)
     
