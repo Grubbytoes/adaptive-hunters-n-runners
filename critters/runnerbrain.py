@@ -5,12 +5,17 @@ import random as rand
 class RunnerBrain():
     
     # first generation constructor!!
-    def __init__(self, parents=[], mutation_ratio=0.4, mutation_strength=0.2):
+    def __init__(self, parents=[], mutation_ratio=0.5, mutation_strength=0.2):
         # first generation
         genes = [0 for i in range(35)]
         if 0 < len(parents):
             # TODO
             pass
+        else:
+            # Executive decision to add an initial bias against going backwards and towards going forward in the first generation
+            # otherwise we'll never get anywhere
+            genes[0] = 0.1
+            genes[2] = -0.1
         
         self.apply_mutation(genes, mutation_ratio, mutation_strength)
         

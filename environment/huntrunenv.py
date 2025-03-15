@@ -9,7 +9,7 @@ class HunterRunnerEnvironment(mesa.Model):
         super().__init__()
         
         width = 160
-        height = 144
+        height = 64
         
         self.grid = mesa.space.MultiGrid(width, height, False)
         self.schedule = mesa.time.RandomActivation(self)

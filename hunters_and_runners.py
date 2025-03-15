@@ -9,7 +9,7 @@ def run():
 
     SCALE = 4
     WIDTH = 160 # width and height need to match those of the HuntNRun grid
-    HEIGHT = 144
+    HEIGHT = 64
     XOFF = SCALE * 10 * 0 # these can be used to place an empty border around the grid
     YOFF = SCALE * 10 * 0 # - this part of the code is copied from a different application, and zeroed as not needed here
     
