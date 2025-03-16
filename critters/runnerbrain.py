@@ -1,16 +1,25 @@
 import numpy as np
 import random as rand
 
+from itertools import chain
+
+GENOME_SIZE = 35
+
 # This is the class where the actual "meat" of the genetic algorithm will take place!!
 class RunnerBrain():
     
     # first generation constructor!!
     def __init__(self, parents=[], mutation_ratio=0.5, mutation_strength=0.2):
         # first generation
-        genes = [0 for i in range(35)]
-        if 0 < len(parents):
-            # TODO
-            pass
+        genes = [0 for i in range(GENOME_SIZE)]
+        parent_count = len(parents)
+        
+        if 1 == parent_count: # ASEXUAL
+            #! UNTESTED
+            genes = parents[0].gene_dump
+        elif 1 < parent_count: # SEXUAL
+            #! SKELETAL
+            parent_genes = chain(parent.gene_dump for parent in parents)
         else:
             # Executive decision to add an initial bias against going backwards and towards going forward in the first generation
             # otherwise we'll never get anywhere

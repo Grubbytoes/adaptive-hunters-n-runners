@@ -19,6 +19,9 @@ class HunterRunnerEnvironment(mesa.Model):
         self.stopped = False
         self.generator = AgentGenerator(width, height, self)
         
+        self.generation = 0
+        self.duds = 0
+        
         self.hunters = []
         self.runners = []
         self.obstacles = []
@@ -30,8 +33,8 @@ class HunterRunnerEnvironment(mesa.Model):
         self.generator.populate()
     
     def populate_next_generation(self, parents):
-        pass
-        # TODO
+        #! NEW AND UNTESTED
+        self.generator.populate(parents)
 
     def print_me(self):
         for a in self.schedule.agents:
@@ -57,7 +60,14 @@ class HunterRunnerEnvironment(mesa.Model):
 
         print("Game over, man!")
         print(f"{len(self.survivors)} survivors")
+        
         self.stopped = True
+        self.generation +=1
+        
+        if 0 >= len(self.survivors): 
+            self.duds += 1
+        else:
+            pass
 
 
 # def make_obstacles(filename, model):

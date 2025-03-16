@@ -30,15 +30,16 @@ class AgentGenerator:
             self._model.grid.place_agent(o, (o.initial_x, o.initial_y))
     
     def populate_runners(self, parents=[]) -> list[critters.Critter]:
-        runners = []
         runner_count: int = int(self._width / 8)
         
-        for i in range(runner_count):
-            x_position = random.randint(0, 7) + 8 * i
-            new_runner = critters.Runner(f"r{i}", self._model, x_position, 0, random.randint(0, 8))
-            runners.append(new_runner)
+        if 0 >= len(parents):
+            return self.first_gen_runners(runner_count)
+        elif 1 == len(parents):
+            return self.asexual_gen_runners(runner_count, parents[0])
+        else:
+            return self.sexual_gen_runners(runner_count, parents)
         
-        return runners
+        # return runners
     
     def populate_hunters(self) -> list[critters.Critter]:
         hunters = []
@@ -78,3 +79,20 @@ class AgentGenerator:
             
         return obstacles
     
+    def first_gen_runners(self, runner_count):
+        runners = []
+        
+        for i in range(runner_count):
+            x_position = random.randint(0, 7) + 8 * i
+            new_runner = critters.Runner(f"r{i}", self._model, x_position, 0, random.randint(0, 8))
+            runners.append(new_runner)
+        
+        return runners
+
+    def asexual_gen_runners(self, runner_count, parent: critters.Runner):
+        runners = []
+        return runners
+
+    def sexual_gen_runners(self, runner_count, parents: list[critters.Runner]):
+        runners = []
+        return runners
