@@ -43,3 +43,6 @@ class Runner(Critter):
     def kill(self):
         self.alive = False
         self.type = 'DeadCritter' #! not fully happy with this...!
+    
+    def gene_dump(self):
+        return self.brain.gene_dump()

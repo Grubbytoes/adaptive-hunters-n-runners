@@ -15,8 +15,7 @@ class RunnerBrain():
         parent_count = len(parents)
         
         if 1 == parent_count: # ASEXUAL
-            #! UNTESTED
-            genes = parents[0].gene_dump
+            genes = parents[0].gene_dump()
         elif 1 < parent_count: # SEXUAL
             #! SKELETAL
             parent_genes = chain(parent.gene_dump for parent in parents)

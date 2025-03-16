@@ -10,17 +10,8 @@ class AgentGenerator:
         self._width = width
         self._height = height
         self._model = model
-        self._reserved_parents = []
 
-    def populate(self, parent_runners=[], ignore_dud=False, reproduction_type=0):
-        # checking if this is a dud generation
-        # if it is we repopulate using the grandparents
-        if len(parent_runners) == 0 and not ignore_dud:
-            self._model.dud_generations += 1
-            parent_runners = self._reserved_parents
-        elif 0 < len(parent_runners):
-            self._reserved_parents = parent_runners # incase they're needed in the future
-        
+    def populate(self, parent_runners=[], reproduction_type=0):       
         hunters = self.populate_hunters()
         runners = self.populate_runners(parent_runners, reproduction_type)
         obstacles = self.populate_obstacles()
@@ -60,7 +51,7 @@ class AgentGenerator:
         for i in range(hunter_count):
             x_position = random.randint(0, 15) + 16 * i
             y_position = random.randint(*hunter_band)
-            new_hunter = critters.Hunter(f"generation {self._model.generation} h{i}", self._model, x_position, y_position)
+            new_hunter = critters.Hunter(f"h{i}", self._model, x_position, y_position)
             hunters.append(new_hunter)
 
         return hunters
@@ -81,7 +72,7 @@ class AgentGenerator:
             while (x_position, y_position) not in self._model.grid.empties: #! eww...
                 x_position = random.randint(0, self._width)
                 y_position = random.randint(*obstacle_band)
-            new_obstacle = critters.Obstacle(f"generation {self._model.generation} o{i}", self._model, x_position, y_position)
+            new_obstacle = critters.Obstacle(f"o{i}", self._model, x_position, y_position)
             obstacles.append(new_obstacle)
 
         return obstacles
@@ -91,7 +82,7 @@ class AgentGenerator:
 
         for i in range(runner_count):
             x_position = random.randint(0, 7) + 8 * i
-            new_runner = critters.Runner(f"generation {self._model.generation} r{i}", self._model, x_position, 0, random.randint(0, 8))
+            new_runner = critters.Runner(f"r{i}", self._model, x_position, 0, random.randint(0, 8))
             runners.append(new_runner)
 
         return runners
@@ -99,21 +90,28 @@ class AgentGenerator:
     def asexual_gen_runners(self, runner_count, parents: critters.Runner):
         runners = []
         
+        if 1 > len(parents):
+            raise Exception("Tried to perform asexual reproduction with no parents")
+        
         for i in range(runner_count):
             p = random.choice(parents)
             
             x_position = random.randint(0, 7) + 8 * i
-            new_runner = critters.Runner(f"generation {self._model.generation} r{i}", self._model, x_position, 0, random.randint(0, 8), parents=[p])
+            new_runner = critters.Runner(f"r{i}", self._model, x_position, 0, random.randint(0, 8), parents=[p])
             runners.append(new_runner)
 
         return runners
 
     def sexual_gen_runners(self, runner_count, parents: list[critters.Runner]):
         runners = []
+                
+        if 2 > len(parents):
+            raise Exception("Tried to perform asexual reproduction less than 2 parents")
+            return
         
         for i in range(runner_count):
             x_position = random.randint(0, 7) + 8 * i
-            new_runner = critters.Runner(f"generation {self._model.generation} r{i}", self._model, x_position, 0, random.randint(0, 8))
+            new_runner = critters.Runner(f"r{i}", self._model, x_position, 0, random.randint(0, 8))
             runners.append(new_runner)
 
         return runners
