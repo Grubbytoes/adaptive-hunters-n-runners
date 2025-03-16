@@ -3,13 +3,15 @@ import mesa
 
 from .agentgenerator import AgentGenerator
 
+ENVIRONMENT_SIZE = 16
+
 class HunterRunnerEnvironment(mesa.Model):
 
     def __init__(self, delay):
         super().__init__()
         
-        width = 160
-        height = 64
+        width = ENVIRONMENT_SIZE * 8
+        height = int(width / 1.8)
         
         self.grid = mesa.space.MultiGrid(width, height, False)
         self.schedule = mesa.time.RandomActivation(self)
@@ -54,6 +56,7 @@ class HunterRunnerEnvironment(mesa.Model):
             return
 
         print("Game over, man!")
+        print(f"{len(self.survivors)} survivors")
         self.stopped = True
 
 

@@ -1,1 +1,1 @@
-from .huntrunenv import HunterRunnerEnvironment
+from .huntrunenv import HunterRunnerEnvironment, ENVIRONMENT_SIZE

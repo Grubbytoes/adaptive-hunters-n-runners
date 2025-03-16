@@ -8,8 +8,10 @@ import environment as env
 def run():
 
     SCALE = 4
-    WIDTH = 160 # width and height need to match those of the HuntNRun grid
-    HEIGHT = 64
+    WIDTH = env.ENVIRONMENT_SIZE * 8 # width and height need to match those of the HuntNRun grid
+    HEIGHT = int(WIDTH / 1.8)
+    LIFETIME = 512
+    
     XOFF = SCALE * 10 * 0 # these can be used to place an empty border around the grid
     YOFF = SCALE * 10 * 0 # - this part of the code is copied from a different application, and zeroed as not needed here
     
@@ -26,12 +28,15 @@ def run():
     # Call the model to populate itself
     model.populate()
 
-    for i in range(10000): # run for this number of simulation steps at maximum
+    for i in range(LIFETIME): # run for this number of simulation steps at maximum
         draw_model_step(model, surface)
 
         # break out of for loop when all runners have either escaped or died
         if model.stopped:
             break
+    
+    # end model if it hasn't stopped already
+    model.end()
 
     # input("Press Enter to close...") # this prevents the pygame window from closing instantly
     pygame.quit()
@@ -70,7 +75,6 @@ def draw_model_step(model: env.HunterRunnerEnvironment, surface: pygame.Surface,
     # draw obstacles
     for a in model.get_agents_of_type(critters.Obstacle): 
         colour = (0, 255, 0)
-        # TODO goes wrong here!!
         col = a.pos[0]
         row = a.pos[1]
         pygame.draw.rect(surface, colour, pygame.Rect(xoff + col*scale, yoff + row*scale, scale, scale))
