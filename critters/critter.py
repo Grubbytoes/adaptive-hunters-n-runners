@@ -90,8 +90,10 @@ class Critter(mesa.Agent):
     def see(self): 
         # clear vision
         self.vision.clear()
-
-        for other in self.model.grid.get_neighbors(self.pos, True, radius=self.sight_range):
+        _thing = self.model.grid
+        field_of_vision = _thing.get_neighbors(self.pos, True, radius=self.sight_range)
+        
+        for other in field_of_vision:
             x_relative = int(other.pos[0] - self.pos[0])
             y_relative = int(other.pos[1] - self.pos[1])
             magnitude = math.sqrt(math.pow(x_relative, 2) + math.pow(y_relative, 2))

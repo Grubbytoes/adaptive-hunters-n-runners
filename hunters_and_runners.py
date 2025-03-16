@@ -10,7 +10,7 @@ def run():
     SCALE = 4
     WIDTH = env.ENVIRONMENT_SIZE * 8 # width and height need to match those of the HuntNRun grid
     HEIGHT = int(WIDTH / 1.8)
-    LIFETIME = 512
+    LIFETIME = 2
     
     XOFF = SCALE * 10 * 0 # these can be used to place an empty border around the grid
     YOFF = SCALE * 10 * 0 # - this part of the code is copied from a different application, and zeroed as not needed here
@@ -23,17 +23,18 @@ def run():
     # set up model
     # - delay parameter can be used to control speed of animation
     #   make it small to make simulation fast
-    model = env.HunterRunnerEnvironment(delay=25)
+    model: env.HunterRunnerEnvironment = env.HunterRunnerEnvironment(delay=25)
     
     # Call the model to populate itself
-    model.populate()
+    model.initial_populate()
 
-    for i in range(LIFETIME): # run for this number of simulation steps at maximum
-        draw_model_step(model, surface)
-
-        # break out of for loop when all runners have either escaped or died
-        if model.stopped:
-            break
+    while model.generation < model.run_for:
+        for i in range(LIFETIME): # run for this number of simulation steps at maximum
+            draw_model_step(model, surface)
+            # break out of for loop when all runners have either escaped or died
+            if model.stopped:
+                break
+        model.end()
     
     # end model if it hasn't stopped already
     model.end()
