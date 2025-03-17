@@ -18,11 +18,13 @@ def run():
     pygame.init()
     display = (SCALE*WIDTH, SCALE*HEIGHT)
     surface = pygame.display.set_mode(display)
-
+    
     model: env.HunterRunnerEnvironment = env.HunterRunnerEnvironment()
+    critters.set_mutation_params(0.2, 0.2)
     model.populate()
     parent_generation = []
     g, g_to = 0, 10
+    
 
     while g < GENS:
         dud_generation = False

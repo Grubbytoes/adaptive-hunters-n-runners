@@ -3,6 +3,8 @@ import random
 
 random.seed()
 
+obstacle_density = 0.04
+
 class AgentGenerator:
 
     def __init__(self, width, height, model):
@@ -58,7 +60,7 @@ class AgentGenerator:
 
     def populate_obstacles(self) -> list[critters.Critter]:
         obstacles = []
-        obstacle_count: int = int(self._width * self._height * 0.5 * 0.05)
+        obstacle_count: int = int(self._width * self._height * 0.5 * obstacle_density)
         obstacle_band = (
             int(self._height / 8),
             int(self._height / 8 * 7)

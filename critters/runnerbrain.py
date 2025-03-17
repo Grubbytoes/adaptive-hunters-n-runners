@@ -5,11 +5,16 @@ from itertools import chain
 
 GENOME_SIZE = 35
 
+print("wtf")
+
+global_mutation_ratio = 0.0
+global_mutation_strength = 0.0
+
 # This is the class where the actual "meat" of the genetic algorithm will take place!!
 class RunnerBrain():
     
     # first generation constructor!!
-    def __init__(self, parents=[], mutation_ratio=0.5, mutation_strength=0.2):
+    def __init__(self, parents=[]):
         # first generation
         genes = [0 for i in range(GENOME_SIZE)]
         parent_count = len(parents)
@@ -26,7 +31,7 @@ class RunnerBrain():
             genes[2] = -0.2
             genes[4] = 0.2
         
-        self.apply_mutation(genes, mutation_ratio, mutation_strength)
+        self.apply_mutation(genes)
         
         self.initial_bias = tuple(genes[0: 5])
         # weightings for each kind of critter
@@ -58,12 +63,15 @@ class RunnerBrain():
                 weight_to_add *= (1 + item[2]) 
                 move_weights[i] += weight_to_add
     
-    def apply_mutation(self, genes, mutation_ratio, mutation_strength):
+    def apply_mutation(self, genes):
         for i in range(len(genes)):
-            if rand.random() > mutation_ratio:
+            if rand.random() > global_mutation_ratio:
                 continue
             
-            genes[i] += (rand.random() * mutation_strength * 2) - mutation_strength
+            genes[i] += (rand.random() * global_mutation_strength * 2) - global_mutation_strength
+            
+            # clamp between -1 and 1
+            genes[i] = min(max(-1.0, genes[i]), 1.0)
     
     def gene_dump(self) -> list[float]:
         genes = [g for g in 
@@ -74,4 +82,10 @@ class RunnerBrain():
         ]
         
         return genes
-        
+
+
+def set_mutation_params(ratio, strength):
+    global global_mutation_ratio, global_mutation_strength
+    
+    global_mutation_ratio = ratio
+    global_mutation_strength = strength
