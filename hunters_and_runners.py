@@ -7,11 +7,13 @@ import environment as env
 # run model once, with specified noise area and probability
 def run():
 
+    env.set_environment_size(20)
+
     SCALE = 4
-    WIDTH = env.ENVIRONMENT_SIZE * 8 # width and height need to match those of the HuntNRun grid
+    WIDTH = env.get_environment_size() * 8 # width and height need to match those of the HuntNRun grid
     HEIGHT = int(WIDTH / 1.8)
-    LIFETIME = 128 + int(env.ENVIRONMENT_SIZE * 16)
-    GENS = 16
+    LIFETIME = 128 + int(env.get_environment_size() * 16)
+    GENS = 50
     REPRODUCTION_TYPE = 2
 
     # set up pygame window
@@ -38,7 +40,7 @@ def run():
         model.end()
 
         # get survivors, otherwise try again
-        if 0 < len(model.survivors):
+        if REPRODUCTION_TYPE <= len(model.survivors):
             g += 1
             parent_generation = model.survivors
         else:

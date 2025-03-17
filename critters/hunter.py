@@ -3,7 +3,7 @@ from .critter import Critter
 
 class Hunter(Critter):
     def __init__(self, unique_id, model, x, y):
-        super().__init__(unique_id, model, x, max(30, y), sight_range=8) # make all hunters start near the top of the environment
+        super().__init__(unique_id, model, x, max(30, y), sight_range=6) # make all hunters start near the top of the environment
         self.type = "Hunter"
         self.timeout = 0
 

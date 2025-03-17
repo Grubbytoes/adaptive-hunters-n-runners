@@ -5,14 +5,14 @@ from itertools import chain
 
 from .agentgenerator import AgentGenerator
 
-ENVIRONMENT_SIZE = 32
+global_environment_size = 32
 
 class HunterRunnerEnvironment(mesa.Model):
 
     def __init__(self, delay=10, parent_runners=[], reproduction_type = 0):
         super().__init__()
         
-        width = ENVIRONMENT_SIZE * 8
+        width = global_environment_size * 8
         height = int(width / 1.8)
         
         self.grid = mesa.space.MultiGrid(width, height, False)
@@ -59,7 +59,14 @@ class HunterRunnerEnvironment(mesa.Model):
         
         self.stopped = True
         
-        
+
+def get_environment_size():
+    return global_environment_size
+
+
+def set_environment_size(s):
+    global global_environment_size
+    global_environment_size = s
 
 
 # def make_obstacles(filename, model):
