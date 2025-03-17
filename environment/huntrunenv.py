@@ -5,7 +5,7 @@ from itertools import chain
 
 from .agentgenerator import AgentGenerator
 
-ENVIRONMENT_SIZE = 24
+ENVIRONMENT_SIZE = 32
 
 class HunterRunnerEnvironment(mesa.Model):
 

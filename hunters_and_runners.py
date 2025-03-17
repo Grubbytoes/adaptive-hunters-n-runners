@@ -10,7 +10,7 @@ def run():
     SCALE = 4
     WIDTH = env.ENVIRONMENT_SIZE * 8 # width and height need to match those of the HuntNRun grid
     HEIGHT = int(WIDTH / 1.8)
-    LIFETIME = 400
+    LIFETIME = 128 + int(env.ENVIRONMENT_SIZE * 16)
     GENS = 16
     REPRODUCTION_TYPE = 1
 

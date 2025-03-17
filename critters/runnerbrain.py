@@ -3,7 +3,7 @@ import random as rand
 
 from itertools import chain
 
-GENOME_SIZE = 35
+GENOME_SIZE = 29
 
 print("wtf")
 
@@ -29,16 +29,17 @@ class RunnerBrain():
             # otherwise we'll never get anywhere
             genes[0] = 0.2
             genes[2] = -0.2
-            genes[4] = 0.2
         
         self.apply_mutation(genes)
         
-        self.initial_bias = tuple(genes[0: 5])
+        self.initial_bias = tuple(genes[0: 4])
         # weightings for each kind of critter
-        self.hunter_weightings = tuple(genes[5: 15])
-        self.runner_weightings = tuple(genes[15: 25])
+        self.hunter_weightings = tuple(genes[4: 12])
+        self.runner_weightings = tuple(genes[12: 20])
         # weightings for obstacles and other unrecognized agents
-        self.obstacle_weightings = tuple(genes[25: 35])
+        self.obstacle_weightings = tuple(genes[20: 28])
+        # impulsiveness
+        self.impulsiveness = genes[28]
         
         # Map to make life easier
         self.recognition_map = {
@@ -46,9 +47,16 @@ class RunnerBrain():
             "Runner": self.runner_weightings
         }
             
-    def think(self, move_weights: np.ndarray, vision = []):
+    def think(self, move_weights: np.ndarray, vision = []): 
+        # roll for impulse(ivness)
+        if (rand.random() * 2 - 1) < self.impulsiveness:
+            move_weights[4] = 10
+            return
+        else:
+            move_weights[4] = -10
+               
         # add initial biases
-        for i in range(len(move_weights)):
+        for i in range(4):
             move_weights[i] += self.initial_bias[i]
         
         # add decision weights
@@ -58,7 +66,7 @@ class RunnerBrain():
         for item in vision:
             decision_weights = self.recognition_map.get(item[3], self.obstacle_weightings)
             
-            for i in range(len(move_weights)):
+            for i in range(4):
                 weight_to_add = (item[0] * decision_weights[2*i]) + (item[1] * decision_weights[(2*i)+1])
                 weight_to_add *= (1 + item[2]) 
                 move_weights[i] += weight_to_add
@@ -80,6 +88,8 @@ class RunnerBrain():
             self.runner_weightings + 
             self.obstacle_weightings
         ]
+        
+        genes.append(self.impulsiveness)
         
         return genes
 
