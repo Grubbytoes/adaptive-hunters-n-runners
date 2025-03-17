@@ -7,7 +7,7 @@ import environment as env
 # run model once, with specified noise area and probability
 def run():
 
-    env.set_environment_size(20)
+    env.set_environment_size(32)
 
     SCALE = 4
     WIDTH = env.get_environment_size() * 8 # width and height need to match those of the HuntNRun grid
@@ -22,7 +22,7 @@ def run():
     surface = pygame.display.set_mode(display)
     
     model: env.HunterRunnerEnvironment = env.HunterRunnerEnvironment()
-    critters.set_mutation_params(0.2, 0.2)
+    critters.set_mutation_params(0.4, 0.2)
     model.populate()
     parent_generation = []
     g, g_to = 0, 10
