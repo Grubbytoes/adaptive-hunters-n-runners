@@ -22,8 +22,15 @@ class RunnerBrain():
         if 1 == parent_count: # ASEXUAL
             genes = parents[0].gene_dump()
         elif 1 < parent_count: # SEXUAL
-            #! SKELETAL
-            parent_genes = chain(parent.gene_dump for parent in parents)
+            #! UNTESTED
+            parent_gene_chain = []
+            for p in parents:
+                parent_gene_chain += p.gene_dump()
+            parent_gene_chain = tuple(parent_gene_chain)
+            
+            for i in range(GENOME_SIZE):
+                inherited_gene = parent_gene_chain[i + rand.randint(0, parent_count-1) * GENOME_SIZE]
+                genes[i] = inherited_gene
         else: # IMMACULATE CONCEPTION IDFK
             # Executive decision to add an initial bias against going backwards and towards going forward in the first generation
             # otherwise we'll never get anywhere

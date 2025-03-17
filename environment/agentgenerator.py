@@ -113,7 +113,7 @@ class AgentGenerator:
         
         for i in range(runner_count):
             x_position = random.randint(0, 7) + 8 * i
-            new_runner = critters.Runner(f"r{i}", self._model, x_position, 0, random.randint(0, 8))
+            new_runner = critters.Runner(f"r{i}", self._model, x_position, 0, random.randint(0, 8), parents=random.choices(parents, k=2))
             runners.append(new_runner)
 
         return runners

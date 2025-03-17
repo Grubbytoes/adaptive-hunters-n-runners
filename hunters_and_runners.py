@@ -12,7 +12,7 @@ def run():
     HEIGHT = int(WIDTH / 1.8)
     LIFETIME = 128 + int(env.ENVIRONMENT_SIZE * 16)
     GENS = 16
-    REPRODUCTION_TYPE = 1
+    REPRODUCTION_TYPE = 2
 
     # set up pygame window
     pygame.init()
