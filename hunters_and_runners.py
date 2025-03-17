@@ -21,7 +21,7 @@ def run():
     display = (SCALE*WIDTH, SCALE*HEIGHT)
     surface = pygame.display.set_mode(display)
     
-    model: env.HunterRunnerEnvironment = env.HunterRunnerEnvironment()
+    model: env.HunterRunnerEnvironment = env.HunterRunnerEnvironment(generation_id="generation_0")
     critters.set_mutation_params(0.4, 0.2)
     model.populate()
     parent_generation = []
@@ -46,7 +46,7 @@ def run():
         else:
             dud_generation = True
 
-        model = env.HunterRunnerEnvironment()
+        model = env.HunterRunnerEnvironment(generation_id=f"generation_{g}")
 
         if dud_generation and len(parent_generation) < REPRODUCTION_TYPE:
             print("Forced to restart first generation")

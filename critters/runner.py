@@ -10,6 +10,7 @@ class Runner(Critter):
         self.escaped = False
         self.alive = True
         self.brain = RunnerBrain(parents)
+        self.parent_record = [p.unique_id for p in parents]
 
     def print_me(self):
         super().print_me()
