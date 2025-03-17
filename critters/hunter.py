@@ -3,8 +3,9 @@ from .critter import Critter
 
 class Hunter(Critter):
     def __init__(self, unique_id, model, x, y):
-        super().__init__(unique_id, model, x, max(30, y), sight_range=8) # make all hunters start near the top of the environment
+        super().__init__(unique_id, model, x, max(30, y), sight_range=6) # make all hunters start near the top of the environment
         self.type = "Hunter"
+        self.timeout = 0
 
     def decide_move(self):
         super().decide_move()
@@ -20,6 +21,11 @@ class Hunter(Critter):
             self.next_move_weights[3] += max(-1 * other[0], 0)
 
     def do_move(self):
+        # check timeout
+        if 0 < self.timeout:
+            self.timeout -= 1
+            return
+        
         # move
         super().do_move()
         
@@ -27,3 +33,4 @@ class Hunter(Critter):
         for n in self.model.grid.get_neighbors(self.pos, moore=True, include_center=True):
             if n.type == "Runner":
                 n.kill()
+                self.timeout = 3

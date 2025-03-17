@@ -7,35 +7,62 @@ import environment as env
 # run model once, with specified noise area and probability
 def run():
 
+    env.set_environment_size(20)
+
     SCALE = 4
-    WIDTH = 160 # width and height need to match those of the HuntNRun grid
-    HEIGHT = 144
-    XOFF = SCALE * 10 * 0 # these can be used to place an empty border around the grid
-    YOFF = SCALE * 10 * 0 # - this part of the code is copied from a different application, and zeroed as not needed here
-    
+    WIDTH = env.get_environment_size() * 8 # width and height need to match those of the HuntNRun grid
+    HEIGHT = int(WIDTH / 1.8)
+    LIFETIME = 128 + int(env.get_environment_size() * 16)
+    GENS = 50
+    REPRODUCTION_TYPE = 2
+
     # set up pygame window
     pygame.init()
     display = (SCALE*WIDTH, SCALE*HEIGHT)
     surface = pygame.display.set_mode(display)
-
-    # set up model
-    # - delay parameter can be used to control speed of animation
-    #   make it small to make simulation fast
-    model = env.HunterRunnerEnvironment(delay=25)
     
-    # Call the model to populate itself
+    model: env.HunterRunnerEnvironment = env.HunterRunnerEnvironment()
+    critters.set_mutation_params(0.2, 0.2)
     model.populate()
+    parent_generation = []
+    g, g_to = 0, 10
+    
 
-    for i in range(10000): # run for this number of simulation steps at maximum
-        draw_model_step(model, surface)
+    while g < GENS:
+        dud_generation = False
+        
+        # run for this number of simulation steps at maximum
+        for i in range(LIFETIME):
+            draw_model_step(model, surface)
+            # break out of for loop when all runners have either escaped or died
+            if model.stopped:
+                break
+        model.end()
 
-        # break out of for loop when all runners have either escaped or died
-        if model.stopped:
-            break
+        # get survivors, otherwise try again
+        if REPRODUCTION_TYPE <= len(model.survivors):
+            g += 1
+            parent_generation = model.survivors
+        else:
+            dud_generation = True
+
+        model = env.HunterRunnerEnvironment()
+
+        if dud_generation and len(parent_generation) < REPRODUCTION_TYPE:
+            print("Forced to restart first generation")
+            model.populate()
+        elif dud_generation:
+            print(f"Forced to restart generation {g}")
+            model.populate(parent_generation, REPRODUCTION_TYPE)
+        else:
+            model.populate(parent_generation, REPRODUCTION_TYPE)
+
+    # end model if it hasn't stopped already
+    model.end()
 
     # input("Press Enter to close...") # this prevents the pygame window from closing instantly
     pygame.quit()
-    
+
 
 def draw_model_step(model: env.HunterRunnerEnvironment, surface: pygame.Surface, xoff=0, yoff=0, scale=4):
     # step the model
@@ -51,14 +78,14 @@ def draw_model_step(model: env.HunterRunnerEnvironment, surface: pygame.Surface,
     surface.fill((0, 0, 0))
 
     # draw hunters
-    for a in model.get_agents_of_type(critters.Hunter): 
+    for a in model.get_agents_of_type(critters.Hunter):
         colour = (255, 0, 0)
         col = a.pos[0]
         row = a.pos[1]
         pygame.draw.rect(surface, colour, pygame.Rect(xoff + col*scale, yoff + row*scale, scale, scale))
 
     # draw runners
-    for a in model.get_agents_of_type(critters.Runner): 
+    for a in model.get_agents_of_type(critters.Runner):
         if a.alive:
             colour = (0, 0, 255)
         else:
@@ -66,11 +93,10 @@ def draw_model_step(model: env.HunterRunnerEnvironment, surface: pygame.Surface,
         col = a.pos[0]
         row = a.pos[1]
         pygame.draw.rect(surface, colour, pygame.Rect(xoff + col*scale, yoff + row*scale, scale, scale))
-    
+
     # draw obstacles
-    for a in model.get_agents_of_type(critters.Obstacle): 
+    for a in model.get_agents_of_type(critters.Obstacle):
         colour = (0, 255, 0)
-        # TODO goes wrong here!!
         col = a.pos[0]
         row = a.pos[1]
         pygame.draw.rect(surface, colour, pygame.Rect(xoff + col*scale, yoff + row*scale, scale, scale))

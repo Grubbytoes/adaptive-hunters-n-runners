@@ -1,29 +1,36 @@
 import time
 import mesa
 
+from itertools import chain
+
 from .agentgenerator import AgentGenerator
+
+global_environment_size = 32
 
 class HunterRunnerEnvironment(mesa.Model):
 
-    def __init__(self, delay):
+    def __init__(self, delay=10, parent_runners=[], reproduction_type = 0):
         super().__init__()
         
-        width = 160
-        height = 144
+        width = global_environment_size * 8
+        height = int(width / 1.8)
         
         self.grid = mesa.space.MultiGrid(width, height, False)
         self.schedule = mesa.time.RandomActivation(self)
         self.delay = delay / 1000
         self.stopped = False
-        self.generator = AgentGenerator(width, height)
+        self.generator = AgentGenerator(width, height, self)       
+        self.reproduction_type = reproduction_type
         
         self.hunters = []
         self.runners = []
         self.obstacles = []
+        
+        self.survivors = []
     
     # MUST be called before the model is run if you want to have any actual agents...!
-    def populate(self):
-        self.generator.populate(self)
+    def populate(self, parents=[], reproduction_type=0):
+        self.generator.populate(parents, reproduction_type)
 
     def print_me(self):
         for a in self.schedule.agents:
@@ -41,9 +48,25 @@ class HunterRunnerEnvironment(mesa.Model):
             self.schedule.step()
             time.sleep(self.delay)
         else:
-            if not self.stopped:
-                print(str(escaped_count) + " escaped!")
-                self.stopped = True
+            self.end()
+    
+    def end(self):
+        if self.stopped:
+            return
+
+        print("Game over, man!")
+        print(f"{len(self.survivors)} survivors")
+        
+        self.stopped = True
+        
+
+def get_environment_size():
+    return global_environment_size
+
+
+def set_environment_size(s):
+    global global_environment_size
+    global_environment_size = s
 
 
 # def make_obstacles(filename, model):
