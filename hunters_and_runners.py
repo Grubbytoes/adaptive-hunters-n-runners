@@ -115,9 +115,9 @@ def draw_model_step(model: env.HunterRunnerEnvironment, surface: pygame.Surface,
 
 def write_results(model: env.HunterRunnerEnvironment):
     runner_population = model.runners
-    _test: datalog.RunnerLogger = datalog.RunnerLogger()
-    _test.read_runner(runner_population[0])
-    results_file.write(_test.write_runner_log())
+    _test = datalog.PopulationLogger()
+    _test.read(runner_population)
+    results_file.write(_test.write_population_log())
 
 
 run()

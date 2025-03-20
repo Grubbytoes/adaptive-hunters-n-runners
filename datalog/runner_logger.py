@@ -1,44 +1,37 @@
-import json
-
+from .abstract_logger import AbstractLogger
 from critters import runner
 
-class RunnerLogger:
+class RunnerLogger(AbstractLogger):
 
-    def __init__(self):
+    def __init__(self, r: runner.Runner=None):
+        super().__init__()
+        
         self.name: str
         self.parents: str
-        self.status: tuple = None
-        self.genes: dict = None
+        self.status: tuple
+        self.genes: tuple
+        
+        if r is not None:
+            self.read(r)
 
-    def read_runner(self, r: runner.Runner):
-        r_genes = r.gene_dump()
-        self.genes = empty_gene_dict()
-
+    def read(self, r: runner.Runner):
+        self.genes = tuple(r.gene_dump())
         self.name = r.unique_id
         self.parents = str(r.parent_record)
         self.status = self._runner_status(r)
-        self.genes.update({
-            "bias" : r_genes[:4],
-            "hunter_weightings" : r_genes[4:12],
-            "runner_weightings" : r_genes[12:20],
-            "obstacle_weightings" : r_genes[20:28],
-            "impulsiveness" : r_genes[28]
-        })
         
-    def write_runner_log(self) -> str:
-        # TODO keep on going!!
-        return json.dumps({
+        self.payload = {
             "name" : self.name,
             "parents" : self.parents,
             "status" : self.status,
-            "genes" : self.genes
-        })
+            "genes" : readable_runner_dict(self.genes)
+        }
 
     def _runner_status(self, r: runner.Runner):
         if r.escaped:
             return ("escaped", r.steps)
         elif not r.alive:
-            return ("died", r.steps)
+            return ("died", r.steps, r.pos[1])
         else:
             return ("lost",)
 
@@ -50,5 +43,18 @@ def empty_gene_dict() -> dict:
         "runner_weightings" : [],
         "obstacle_weightings" : [],
         "impulsiveness" : []
+    }
+
+
+def readable_runner_dict(raw_genes: tuple):
+    if 28 > len(raw_genes):
+        raise Exception("Not enough genes, my guy")
+    
+    return {
+        "bias" : raw_genes[:4],
+        "hunter_weightings" : raw_genes[4:12],
+        "runner_weightings" : raw_genes[12:20],
+        "obstacle_weightings" : raw_genes[20:28],
+        "impulsiveness" : raw_genes[28]
     }
         
