@@ -7,8 +7,9 @@ obstacle_density = 0.04
 
 class AgentGenerator:
 
-    def __init__(self, width, height, model):
-
+    def __init__(self, width, height, model, generation_id):
+        self.generation_id = generation_id
+        
         self._width = width
         self._height = height
         self._model = model
@@ -53,7 +54,7 @@ class AgentGenerator:
         for i in range(hunter_count):
             x_position = random.randint(0, 15) + 16 * i
             y_position = random.randint(*hunter_band)
-            new_hunter = critters.Hunter(f"h{i}", self._model, x_position, y_position)
+            new_hunter = critters.Hunter(f"{self.generation_id} h{i}", self._model, x_position, y_position)
             hunters.append(new_hunter)
 
         return hunters
@@ -74,7 +75,7 @@ class AgentGenerator:
             while (x_position, y_position) not in self._model.grid.empties: #! eww...
                 x_position = random.randint(0, self._width)
                 y_position = random.randint(*obstacle_band)
-            new_obstacle = critters.Obstacle(f"o{i}", self._model, x_position, y_position)
+            new_obstacle = critters.Obstacle(f"{self.generation_id} o{i}", self._model, x_position, y_position)
             obstacles.append(new_obstacle)
 
         return obstacles
@@ -84,7 +85,7 @@ class AgentGenerator:
 
         for i in range(runner_count):
             x_position = random.randint(0, 7) + 8 * i
-            new_runner = critters.Runner(f"r{i}", self._model, x_position, 0, random.randint(0, 8))
+            new_runner = critters.Runner(f"{self.generation_id} r{i}", self._model, x_position, 0, random.randint(0, 8))
             runners.append(new_runner)
 
         return runners
@@ -99,7 +100,7 @@ class AgentGenerator:
             p = random.choice(parents)
             
             x_position = random.randint(0, 7) + 8 * i
-            new_runner = critters.Runner(f"r{i}", self._model, x_position, 0, random.randint(0, 8), parents=[p])
+            new_runner = critters.Runner(f"{self.generation_id} r{i}", self._model, x_position, 0, random.randint(0, 8), parents=[p])
             runners.append(new_runner)
 
         return runners
@@ -113,7 +114,7 @@ class AgentGenerator:
         
         for i in range(runner_count):
             x_position = random.randint(0, 7) + 8 * i
-            new_runner = critters.Runner(f"r{i}", self._model, x_position, 0, random.randint(0, 8), parents=random.choices(parents, k=2))
+            new_runner = critters.Runner(f"{self.generation_id} r{i}", self._model, x_position, 0, random.randint(0, 8), parents=random.choices(parents, k=2))
             runners.append(new_runner)
 
         return runners

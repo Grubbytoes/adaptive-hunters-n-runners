@@ -1,35 +1,42 @@
 import pygame
 
 import critters
+import datalog
 import environment as env
+
+
+results_file = open("results.json", "w")
 
 
 # run model once, with specified noise area and probability
 def run():
 
-    env.set_environment_size(32)
+    env.set_environment_size(10)
 
-    SCALE = 4
+    SCALE = 4 # TODO wtf...!?
     WIDTH = env.get_environment_size() * 8 # width and height need to match those of the HuntNRun grid
     HEIGHT = int(WIDTH / 1.8)
     LIFETIME = 128 + int(env.get_environment_size() * 16)
-    GENS = 50
-    REPRODUCTION_TYPE = 2
+    GENS = 5
+    REPRODUCTION_TYPE = 1
 
     # set up pygame window
     pygame.init()
     display = (SCALE*WIDTH, SCALE*HEIGHT)
     surface = pygame.display.set_mode(display)
     
-    model: env.HunterRunnerEnvironment = env.HunterRunnerEnvironment()
+    model: env.HunterRunnerEnvironment = env.HunterRunnerEnvironment(generation_id="generation_0")
     critters.set_mutation_params(0.4, 0.2)
     model.populate()
     parent_generation = []
-    g, g_to = 0, 10
     
-
-    while g < GENS:
+    iter_log = datalog.IterationLogger()
+    iter_log.set_param_data((0.2, 0.2, REPRODUCTION_TYPE))
+    
+    for g in range (GENS):
+        print(f"GENERATION {g}")
         dud_generation = False
+        pop_log = datalog.PopulationLogger()
         
         # run for this number of simulation steps at maximum
         for i in range(LIFETIME):
@@ -46,7 +53,7 @@ def run():
         else:
             dud_generation = True
 
-        model = env.HunterRunnerEnvironment()
+        model = env.HunterRunnerEnvironment(generation_id=f"generation_{g}")
 
         if dud_generation and len(parent_generation) < REPRODUCTION_TYPE:
             print("Forced to restart first generation")
@@ -56,9 +63,18 @@ def run():
             model.populate(parent_generation, REPRODUCTION_TYPE)
         else:
             model.populate(parent_generation, REPRODUCTION_TYPE)
+        
+        # Reading th population for logging purposes
+        pop_log.read(model.runners)
+        iter_log.read(pop_log)
+        
+        print("\n---\n")
 
     # end model if it hasn't stopped already
     model.end()
+    
+    # write the iteration log
+    results_file.write(iter_log.dump())
 
     # input("Press Enter to close...") # this prevents the pygame window from closing instantly
     pygame.quit()

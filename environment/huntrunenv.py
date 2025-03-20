@@ -9,7 +9,7 @@ global_environment_size = 32
 
 class HunterRunnerEnvironment(mesa.Model):
 
-    def __init__(self, delay=10, parent_runners=[], reproduction_type = 0):
+    def __init__(self, delay=1, parent_runners=[], reproduction_type = 0, generation_id="unknown generation"):
         super().__init__()
         
         width = global_environment_size * 8
@@ -19,7 +19,7 @@ class HunterRunnerEnvironment(mesa.Model):
         self.schedule = mesa.time.RandomActivation(self)
         self.delay = delay / 1000
         self.stopped = False
-        self.generator = AgentGenerator(width, height, self)       
+        self.generator = AgentGenerator(width, height, self, generation_id)       
         self.reproduction_type = reproduction_type
         
         self.hunters = []

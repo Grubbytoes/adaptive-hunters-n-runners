@@ -10,6 +10,9 @@ class Runner(Critter):
         self.escaped = False
         self.alive = True
         self.brain = RunnerBrain(parents)
+        
+        # vars for logging
+        self.parent_record = [p.unique_id for p in parents]
 
     def print_me(self):
         super().print_me()
@@ -27,9 +30,11 @@ class Runner(Critter):
         elif not self.alive:
             return
         
+        # if they get this far then it counts as a step
+        self.steps += 1
+        
         # wait if they need to
-        if self.steps < self.pause:
-            self.steps += 1
+        if self.steps <= self.pause:
             return
         
         super().do_move()
