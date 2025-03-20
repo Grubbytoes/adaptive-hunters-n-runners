@@ -11,13 +11,13 @@ results_file = open("results.json", "w")
 # run model once, with specified noise area and probability
 def run():
 
-    env.set_environment_size(50)
+    env.set_environment_size(10)
 
     SCALE = 4 # TODO wtf...!?
     WIDTH = env.get_environment_size() * 8 # width and height need to match those of the HuntNRun grid
     HEIGHT = int(WIDTH / 1.8)
     LIFETIME = 128 + int(env.get_environment_size() * 16)
-    GENS = 10
+    GENS = 5
     REPRODUCTION_TYPE = 1
 
     # set up pygame window
@@ -31,6 +31,8 @@ def run():
     parent_generation = []
     
     iter_log = datalog.IterationLogger()
+    iter_log.set_param_data((0.2, 0.2, REPRODUCTION_TYPE))
+    
     for g in range (GENS):
         print(f"GENERATION {g}")
         dud_generation = False

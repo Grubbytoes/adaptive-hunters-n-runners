@@ -6,14 +6,17 @@ class IterationLogger(AbstractLogger):
     def __init__(self):
         super().__init__()
         self.generations = []
-        self.params = None
+        self._param_data = None
+        
         self.payload = {
-            "params": self.params,
             "generations": self.generations
         }
 
-    def enter_params(self, params):
-        self.params = params
+    def set_param_data(self, params):
+        self._param_data = params
+    
+    def get_param_data(self):
+        return tuple(self._param_data)
 
     def read(self, other):
         self.generations.append(other.copy_payload())
