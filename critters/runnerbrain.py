@@ -34,8 +34,8 @@ class RunnerBrain():
         else: # IMMACULATE CONCEPTION IDFK
             # Executive decision to add an initial bias against going backwards and towards going forward in the first generation
             # otherwise we'll never get anywhere
-            genes[0] = 0.2
-            genes[2] = -0.2
+            genes[0] = 0.1
+            genes[2] = -0.1
         
         self.apply_mutation(genes)
         
