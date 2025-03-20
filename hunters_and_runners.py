@@ -1,20 +1,24 @@
 import pygame
 
 import critters
+import datalog
 import environment as env
+
+
+results_file = open("results.json", "w")
 
 
 # run model once, with specified noise area and probability
 def run():
 
-    env.set_environment_size(32)
+    env.set_environment_size(8)
 
-    SCALE = 4
+    SCALE = 4 # TODO wtf...!?
     WIDTH = env.get_environment_size() * 8 # width and height need to match those of the HuntNRun grid
     HEIGHT = int(WIDTH / 1.8)
     LIFETIME = 128 + int(env.get_environment_size() * 16)
-    GENS = 50
-    REPRODUCTION_TYPE = 2
+    GENS = 1
+    REPRODUCTION_TYPE = 1
 
     # set up pygame window
     pygame.init()
@@ -29,6 +33,7 @@ def run():
     
 
     while g < GENS:
+        print(f"GENERATION {g}")
         dud_generation = False
         
         # run for this number of simulation steps at maximum
@@ -56,6 +61,9 @@ def run():
             model.populate(parent_generation, REPRODUCTION_TYPE)
         else:
             model.populate(parent_generation, REPRODUCTION_TYPE)
+            write_results(model)
+        
+        print("\n---\n")
 
     # end model if it hasn't stopped already
     model.end()
@@ -103,6 +111,13 @@ def draw_model_step(model: env.HunterRunnerEnvironment, surface: pygame.Surface,
 
 
     pygame.display.flip()
+
+
+def write_results(model: env.HunterRunnerEnvironment):
+    runner_population = model.runners
+    _test: datalog.RunnerLogger = datalog.RunnerLogger()
+    _test.read_runner(runner_population[0])
+    results_file.write(_test.write_runner_log())
 
 
 run()
