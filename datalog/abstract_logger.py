@@ -9,4 +9,4 @@ class AbstractLogger:
         raise NotImplementedError("read method not implemented!!")
            
     def dump(self):
-        return json.dumps(self.payload)
+        return json.dumps(self.payload, indent=2)

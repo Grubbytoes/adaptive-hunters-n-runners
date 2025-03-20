@@ -117,7 +117,7 @@ def write_results(model: env.HunterRunnerEnvironment):
     runner_population = model.runners
     _test = datalog.PopulationLogger()
     _test.read(runner_population)
-    results_file.write(_test.write_population_log())
+    results_file.write(_test.dump())
 
 
 run()

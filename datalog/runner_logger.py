@@ -24,7 +24,7 @@ class RunnerLogger(AbstractLogger):
             "name" : self.name,
             "parents" : self.parents,
             "status" : self.status,
-            "genes" : readable_runner_dict(self.genes)
+            "genes" : readable_gene_dict(self.genes)
         }
 
     def _runner_status(self, r: runner.Runner):
@@ -46,7 +46,7 @@ def empty_gene_dict() -> dict:
     }
 
 
-def readable_runner_dict(raw_genes: tuple):
+def readable_gene_dict(raw_genes: tuple):
     if 28 > len(raw_genes):
         raise Exception("Not enough genes, my guy")
     
