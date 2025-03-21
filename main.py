@@ -1,6 +1,9 @@
 
 import critters
 import datalog
+import time
+import itertools
+import threading
 # import pygame
 
 import environment as env
@@ -8,15 +11,26 @@ import environment as env
 
 RESULTS_PATH = "results/"
 LIFETIME = 128 + int(env.get_environment_size() * 16)
-GENS = 10
-env.set_environment_size(50)
+GENS = 25
+env.set_environment_size(25)
 
 def main():
-    run_with(1, 0.4, 0.2)
-
+    timer = time.time()
+    
+    asexual_sweep = threading.Thread(target=sweep, args=(1, [0.1, 0.2, 0.3], [0.1, 0.2, 0.3]))
+    sexual_sweep = threading.Thread(target=sweep, args=(2, [0.1, 0.2, 0.3], [0.1, 0.2, 0.3]))
+    
+    asexual_sweep.start()
+    sexual_sweep.start()
+    
+    asexual_sweep.join()
+    sexual_sweep.join()
+    
+    timer = timer.time() - timer
+    print(f"program time: {timer} seconds")
 
 # run model once, with specified noise area and probability
-def run_with(reproduction_type = 1, mutation_factor=0.2, mutation_strength=0.2):
+def run_with(generations=1, reproduction_type = 1, mutation_factor=0.2, mutation_strength=0.2, do_write_results=True):
     
     model: env.HunterRunnerEnvironment = env.HunterRunnerEnvironment(generation_id="generation_0")
     critters.set_mutation_params(mutation_factor, mutation_strength)
@@ -27,8 +41,8 @@ def run_with(reproduction_type = 1, mutation_factor=0.2, mutation_strength=0.2):
     iter_log.set_param_data((0.2, 0.2, reproduction_type))
     g = 0
     
-    while g < GENS:
-        print(f"GENERATION {g}")
+    while g < generations:
+        # print(f"GENERATION {g}")
         dud_generation = False
         pop_log = datalog.PopulationLogger()
         
@@ -53,10 +67,10 @@ def run_with(reproduction_type = 1, mutation_factor=0.2, mutation_strength=0.2):
         model = env.HunterRunnerEnvironment(generation_id=f"generation_{g}")
 
         if g == 0 and dud_generation:
-            print("Forced to restart first generation")
+            # print("Forced to restart first generation")
             model.populate()
         elif dud_generation:
-            print(f"Forced to restart generation {g}")
+            # print(f"Forced to restart generation {g}")
             model.populate(parent_generation, reproduction_type)
         else:
             model.populate(parent_generation, reproduction_type)
@@ -65,12 +79,15 @@ def run_with(reproduction_type = 1, mutation_factor=0.2, mutation_strength=0.2):
         pop_log.read(model.runners)
         iter_log.read(pop_log)
         
-        print("\n---\n")
+        # print("\n---\n")
 
     # end model if it hasn't stopped already
     model.end()
     
     # write the results
+    if not do_write_results:
+        return
+    
     results_file_name: str
     if reproduction_type == 1:
         results_file_name = f"asexual{[mutation_factor, mutation_strength]}"
@@ -84,6 +101,12 @@ def run_with(reproduction_type = 1, mutation_factor=0.2, mutation_strength=0.2):
 def write_results(log: datalog.IterationLogger, filename:str):
     results_file = open(f"{RESULTS_PATH}{filename}.json", "w")
     results_file.write(log.dump())
+
+
+def sweep(reproduction_type = 1, mutation_factor_range=[], mutation_strength_range=[]):
+    # We could thread this to further improve performance but idk man...
+    for f, s in itertools.product(mutation_factor_range, mutation_strength_range):
+        run_with(GENS, reproduction_type, f, s)
 
 
 def draw_model(model: env.HunterRunnerEnvironment, surface, xoff=0, yoff=0, scale=4):

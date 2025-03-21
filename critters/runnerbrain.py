@@ -5,8 +5,6 @@ from itertools import chain
 
 GENOME_SIZE = 29
 
-print("wtf")
-
 global_mutation_ratio = 0.0
 global_mutation_strength = 0.0
 
