@@ -12,13 +12,13 @@ import environment as env
 RESULTS_PATH = "results/"
 LIFETIME = 128 + int(env.get_environment_size() * 16)
 GENS = 25
-env.set_environment_size(25)
+env.set_environment_size(100)
 
 def main():
     timer = time.time()
     
-    asexual_sweep = threading.Thread(target=sweep, args=(1, [0.1, 0.2, 0.3], [0.1, 0.2, 0.3]))
-    sexual_sweep = threading.Thread(target=sweep, args=(2, [0.1, 0.2, 0.3], [0.1, 0.2, 0.3]))
+    asexual_sweep = threading.Thread(target=sweep, args=(1, [0.2, 0.4], [0.2, 0.4]))
+    sexual_sweep = threading.Thread(target=sweep, args=(2, [0.2, 0.4], [0.2, 0.4]))
     
     asexual_sweep.start()
     sexual_sweep.start()
@@ -26,7 +26,7 @@ def main():
     asexual_sweep.join()
     sexual_sweep.join()
     
-    timer = timer.time() - timer
+    timer = time.time() - timer
     print(f"program time: {timer} seconds")
 
 # run model once, with specified noise area and probability
@@ -105,8 +105,16 @@ def write_results(log: datalog.IterationLogger, filename:str):
 
 def sweep(reproduction_type = 1, mutation_factor_range=[], mutation_strength_range=[]):
     # We could thread this to further improve performance but idk man...
+    threads = []
+    
     for f, s in itertools.product(mutation_factor_range, mutation_strength_range):
-        run_with(GENS, reproduction_type, f, s)
+        new_thread = threading.Thread(target=run_with, args=(GENS, reproduction_type, f, s))
+        threads.append(new_thread)
+        new_thread.start()
+    
+    for t in threads:
+        t.join()
+
 
 
 def draw_model(model: env.HunterRunnerEnvironment, surface, xoff=0, yoff=0, scale=4):
