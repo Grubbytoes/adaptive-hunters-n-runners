@@ -1,7 +1,8 @@
-import pygame
 
 import critters
 import datalog
+# import pygame
+
 import environment as env
 
 
@@ -11,19 +12,11 @@ results_file = open("results.json", "w")
 # run model once, with specified noise area and probability
 def run():
 
-    env.set_environment_size(10)
+    env.set_environment_size(50)
 
-    SCALE = 4 # TODO wtf...!?
-    WIDTH = env.get_environment_size() * 8 # width and height need to match those of the HuntNRun grid
-    HEIGHT = int(WIDTH / 1.8)
     LIFETIME = 128 + int(env.get_environment_size() * 16)
-    GENS = 5
+    GENS = 100
     REPRODUCTION_TYPE = 1
-
-    # set up pygame window
-    pygame.init()
-    display = (SCALE*WIDTH, SCALE*HEIGHT)
-    surface = pygame.display.set_mode(display)
     
     model: env.HunterRunnerEnvironment = env.HunterRunnerEnvironment(generation_id="generation_0")
     critters.set_mutation_params(0.4, 0.2)
@@ -40,7 +33,10 @@ def run():
         
         # run for this number of simulation steps at maximum
         for i in range(LIFETIME):
-            draw_model_step(model, surface)
+            # step the model
+            model.step()
+            # draw the model
+            # draw_model(model, surface)
             # break out of for loop when all runners have either escaped or died
             if model.stopped:
                 break
@@ -80,45 +76,8 @@ def run():
     pygame.quit()
 
 
-def draw_model_step(model: env.HunterRunnerEnvironment, surface: pygame.Surface, xoff=0, yoff=0, scale=4):
-    # step the model
-    model.step()
-
-    # if pygame window is closed, then quit
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            quit()
-
-    # fill pygame window background in black
-    surface.fill((0, 0, 0))
-
-    # draw hunters
-    for a in model.get_agents_of_type(critters.Hunter):
-        colour = (255, 0, 0)
-        col = a.pos[0]
-        row = a.pos[1]
-        pygame.draw.rect(surface, colour, pygame.Rect(xoff + col*scale, yoff + row*scale, scale, scale))
-
-    # draw runners
-    for a in model.get_agents_of_type(critters.Runner):
-        if a.alive:
-            colour = (0, 0, 255)
-        else:
-            colour = (60, 60, 60)
-        col = a.pos[0]
-        row = a.pos[1]
-        pygame.draw.rect(surface, colour, pygame.Rect(xoff + col*scale, yoff + row*scale, scale, scale))
-
-    # draw obstacles
-    for a in model.get_agents_of_type(critters.Obstacle):
-        colour = (0, 255, 0)
-        col = a.pos[0]
-        row = a.pos[1]
-        pygame.draw.rect(surface, colour, pygame.Rect(xoff + col*scale, yoff + row*scale, scale, scale))
-
-
-    pygame.display.flip()
+def draw_model(model: env.HunterRunnerEnvironment, surface, xoff=0, yoff=0, scale=4):
+    raise NotImplementedError("This version of hunter and runners no longer uses pygame, I'm afraid...")
 
 
 run()
