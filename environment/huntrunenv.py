@@ -52,11 +52,7 @@ class HunterRunnerEnvironment(mesa.Model):
     
     def end(self):
         if self.stopped:
-            return
-
-        print("Game over, man!")
-        print(f"{len(self.survivors)} survivors")
-        
+            return        
         self.stopped = True
         
 
