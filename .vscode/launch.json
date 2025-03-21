@@ -5,18 +5,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "hunters and runners",
-      "type": "python",
-      "request": "launch",
-      "program": "hunters_and_runners.py",
-      "console": "integratedTerminal"      
-    },
-
-    {
       "name": "debug hunters and runners",
       "type": "debugpy",
       "request": "launch",
-      "program": "hunters_and_runners.py",
+      "program": "main.py",
       "console": "integratedTerminal"
     }
   ]
