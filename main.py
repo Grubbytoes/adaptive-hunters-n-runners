@@ -10,15 +10,18 @@ import environment as env
 
 
 RESULTS_PATH = "results/"
-LIFETIME = 128 + int(env.get_environment_size() * 16)
-GENS = 50
-env.set_environment_size(50)
+LIFETIME = 128 + int(env.get_environment_size() * 24)
+GENS = 100
+env.set_environment_size(60)
 
 def main():
     timer = time.time()
     
-    asexual_sweep = threading.Thread(target=sweep, args=(1, [0.2, 0.4], [0.2, 0.4]))
-    sexual_sweep = threading.Thread(target=sweep, args=(2, [0.2, 0.4], [0.2, 0.4]))
+    sweep_params = [p / 10 for p in range(1, 6)]
+    print(sweep_params)
+    
+    asexual_sweep = threading.Thread(target=sweep, args=(1, sweep_params, sweep_params))
+    sexual_sweep = threading.Thread(target=sweep, args=(2, sweep_params, sweep_params))
 
     asexual_sweep.start()
     sexual_sweep.start()
@@ -102,7 +105,7 @@ def run_with(generations=1, reproduction_type = 1, mutation_factor=0.2, mutation
 
 def write_results(log: datalog.IterationLogger, filename:str):
     results_file = open(f"{RESULTS_PATH}{filename}.json", "w")
-    results_file.write(log.dump(2))
+    results_file.write(log.dump())
 
 
 def sweep(reproduction_type = 1, mutation_factor_range=[], mutation_strength_range=[], parallels=1):
@@ -122,6 +125,8 @@ def sweep(reproduction_type = 1, mutation_factor_range=[], mutation_strength_ran
 
     for remaining_thread in threads[-parallels:]:
         remaining_thread.join
+    
+    print("SWEEP DONE!!")
 
 
 def draw_model(model: env.HunterRunnerEnvironment, surface, xoff=0, yoff=0, scale=4):
