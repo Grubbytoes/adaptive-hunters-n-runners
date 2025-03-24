@@ -69,6 +69,9 @@ class RunnerBrain():
         weight_to_add: float
         
         for item in vision:
+            # where item[3] if the items type
+            # and recognition_map will contain the genes for decision making
+            # for an item of that type
             decision_weights = self.recognition_map.get(item[3], self.obstacle_weightings)
             
             for i in range(4):

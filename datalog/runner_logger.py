@@ -29,9 +29,9 @@ class RunnerLogger(AbstractLogger):
 
     def _runner_status(self, r: runner.Runner):
         if r.escaped:
-            return ("escaped", r.steps)
+            return ("escaped", int(r.steps))
         elif not r.alive:
-            return ("died", r.steps, r.pos[1])
+            return ("died", int(r.steps), int(r.pos[1]))
         else:
             return ("lost",)
 

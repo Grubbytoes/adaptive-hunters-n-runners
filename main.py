@@ -69,6 +69,10 @@ def run_with(generations=1, reproduction_type = 1, mutation_factor=0.2, mutation
             dud_generation = True
             print(f"{param_data} restarting")
 
+        # Reading the population for logging purposes
+        pop_log.read(model.runners)
+        iter_log.read(pop_log)
+
         model = env.HunterRunnerEnvironment(generation_id=f"generation_{g}")
 
         if g == 0 and dud_generation:
@@ -79,10 +83,6 @@ def run_with(generations=1, reproduction_type = 1, mutation_factor=0.2, mutation
             model.populate(parent_generation, reproduction_type)
         else:
             model.populate(parent_generation, reproduction_type)
-
-        # Reading th population for logging purposes
-        pop_log.read(model.runners)
-        iter_log.read(pop_log)
 
         # print("\n---\n")
 
